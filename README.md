@@ -30,3 +30,4 @@
 - [k6control](https://k6.io/blog/building-a-ui-for-the-k6-load-testing-tool)
 - WM primo v testu nebo v konfiguracnim souboru bokem
 - podpora pouze http1, http2 a WS
+- tezko rict, jak si K6 poradi s csv data setem o 40.000 zaznamech, kdyz to nacita javascript
