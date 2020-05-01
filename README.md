@@ -21,6 +21,8 @@
 # How To Run
 `docker run --name k6 -i --rm loadimpact/k6 run - < elasticsearch/isUp.js --http-debug=full`
 
+# Convert HAR to K6 test
+`k6 convert -O elasticsearch/syntexHomePage.js /Users/rdpanek/HTDOCS/teststack/k6/elasticsearch/har/www.syntex.cz.har`
 
 # Notes
 
