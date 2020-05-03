@@ -7,23 +7,15 @@ export let options = {
   batchPerHost: 6,
   noUsageReport: true,
   stages: [{
-        duration: '30s',
-        target: 500
-      },
-      {
-        duration: '1m30s',
-        target: 1000
-      },
-      {
-        duration: '1m30s',
-        target: 1000
+        duration: '10m',
+        target: 1
       },
   ],
 };
 
 const protocol = "http"
-const server = "169.254.23.210"
-const port = 9200
+const server = __ENV.SERVER ? __ENV.SERVER : 'localhost'
+const port = __ENV.PORT ? __ENV.PORT : 9200
 
 // defaultRequest
 export function setup() {
