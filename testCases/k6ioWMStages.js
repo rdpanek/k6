@@ -12,7 +12,7 @@ export let options = {
 };
 
 export default function () {
-  let res = http.get('https://httpbin.org/');
+  let res = http.get('https://www.ifortuna.cz/');
   check(res, { 'status was 200': (r) => r.status == 200 });
   sleep(1);
 }

@@ -36,6 +36,11 @@
 - test summary / metrics guide https://k6.io/docs/using-k6/metrics
 - features https://hub.docker.com/r/loadimpact/k6/
 - output plugins https://k6.io/docs/getting-started/results-output#output-plugins
+- k6 crypto https://k6.io/docs/javascript-api/k6-crypto
+- sharedArray https://k6.io/docs/javascript-api/k6-data/sharedarray
+- parseResponse https://k6.io/docs/javascript-api/k6-html/parsehtml-src
+- ip aliasing https://k6.io/docs/using-k6/options#local-ips
+- js libraries https://jslib.k6.io/
 - docker image ma pouhych 33.6MB
 - cloud a opensource verze
 - [k6control](https://k6.io/blog/building-a-ui-for-the-k6-load-testing-tool)
