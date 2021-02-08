@@ -22,7 +22,7 @@
 - `brew install k6`
 
 # How To Run
-`docker run --name k6 -i --rm loadimpact/k6 run - < elasticsearch/isUp.js --http-debug=full`
+`docker run --name k6 -i --rm loadimpact/k6 run - < testCases/k6io.js --vus 10 --duration 30s`
 
 # How To Run with ENV
 `docker run --name k6 -i --rm -e SERVER=192.168.1.176 -e PORT=9200 rdpanek/k6:0.26.2 run - < elasticsearch/elasticsearch.js`
@@ -32,6 +32,11 @@
 
 # Notes
 
+
+- test summary / metrics guide https://k6.io/docs/using-k6/metrics
+- features https://hub.docker.com/r/loadimpact/k6/
+- output plugins https://k6.io/docs/getting-started/results-output#output-plugins
+- docker image ma pouhych 33.6MB
 - cloud a opensource verze
 - [k6control](https://k6.io/blog/building-a-ui-for-the-k6-load-testing-tool)
 - WM primo v testu nebo v konfiguracnim souboru bokem
