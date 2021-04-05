@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: canarytrace-listener-rules
+  namespace: canarytrace
+data:
+  configurator: |
+    {
+      scenarios: {
+        homepage: {
+          executor: 'constant-vus',
+          vus: 1,
+          duration: '1m',
+          gracefulStop: '0s',
+          tags: { test_type: 'homepage' },
+          exec: 'homePageScenario',
+        },
+      },
+      batchPerHost: 6,
+      thresholds: { 
+        http_req_connecting: ['p(90) > 3000'],
+        http_req_waiting: ['p(90) > 1000']
+      },
+      //discardResponseBodies: true,
+      //duration: '3m', // without WM
+      //iterations: 10,
+      //httpDebug: 'full',
+      //noConnectionReuse: true,
+      //rps: 500,
+    }
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: k6
+spec:
+  selector:
+    matchLabels:
+      app: k6
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: k6
+        test: load
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: "app"
+                  operator: "In"
+                  values: [ "k6" ]
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: k6
+        image: loadimpact/k6:0.31.1
+        env:
+        - name: GIT_REVISION
+          value: "4e44e02"
+        - name: TEST_PLAN_NAME
+          value: "baseline.js"
+        - name: GIT_REPOSITORY
+          valueFrom:
+            configMapKeyRef:
+              name: jmeter-config
+              key: repository
+        - name: GIT_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: jmeter-config
+              key: repository.host
+        - name: GIT_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: jmeter-config
+              key: repository.port
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+          limits:
+            memory: "2Gi"
+            cpu: "2"
+        imagePullPolicy: "Always"
