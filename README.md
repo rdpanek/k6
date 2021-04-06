@@ -18,6 +18,8 @@
 - `docker run --name k6 -i --rm -v $(pwd):/home/k6/ loadimpact/k6:0.31.1 run baseline.js --no-usage-report`
 
 # How to run with clone public git repository with tests
+> this command download repository, checkout on revision and run k6
+- `docker run --name k6 -it --rm -e GIT_TEST_REPOSITORY=https://github.com/rdpanek/k6.git -e GIT_REVISION=04a28b8 quay.io/rdpanek/k6:1.0.0`
 
 # How To Run with ENV
 `docker run --name k6 -i --rm -e SERVER=192.168.1.176 -e PORT=9200 rdpanek/k6:0.26.2 run - < elasticsearch/elasticsearch.js`
