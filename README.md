@@ -1,23 +1,15 @@
 # k6
+> Open source load testing tool and SaaS for engineering teams
 
-## Goal
+## Bookmarks
 - https://k6.io/
 - Samples https://github.com/loadimpact/k6/tree/master/samples
 - Awesome https://github.com/k6io/awesome-k6
 - Apache Kafka https://medium.com/k6-io/integrating-k6-with-apache-kafka-eda96ea7c749
 - Tool review 2020 https://k6.io/blog/comparing-best-open-source-load-testing-tools
 
-- research k6.io
-- POC
--   REST API (elasticsearch)
--   live logging to elasticsearch
--   Web App
--   Distrib 
-- dockerize (dockerizovano jiz je)
-- deploy to k8
 
-
-# Installation
+# How to get
 - `docker pull loadimpact/k6`
 - `brew install k6`
 

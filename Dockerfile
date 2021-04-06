@@ -1,5 +1,13 @@
-FROM loadimpact/k6:0.26.2
+FROM loadimpact/k6:0.31.1
 
-COPY ./elasticsearch/elasticsearch.js /home/k6
+USER root
 
-CMD ["run", "/home/k6/elasticsearch.js", "--http-debug=full"]
+ENV K6_HOME /home/k6
+ENV TESTS ${K6_HOME}/test
+
+COPY entrypoint.sh /
+RUN chmod -R a+rwX $K6_HOME && \
+    apk add git
+
+WORKDIR $K6_HOME
+ENTRYPOINT ["/entrypoint.sh"]
