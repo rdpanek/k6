@@ -4,7 +4,7 @@
 import {open} from './fragments/homePage.js'
 
 // configurations
-import {config} from './config/baseline.js'
+import {config} from './config/default.js'
 
 // options
 export let options = config
