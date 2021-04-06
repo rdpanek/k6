@@ -1,0 +1,50 @@
+name: Build Canarytrace Professional
+
+# run paralel three jobs [elastic, demoWeb, build Canary image with temp tag]
+# fourth job wait on above jobs are done
+# run E2E test Canarytrace smoke
+# push to quay repository
+
+# build only on push to master branch
+on:
+  push:
+    branches: master
+
+jobs:
+  
+  Build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Build docker image
+      -
+        name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      -
+        name: 'Get Previous Tag'
+        id: previoustag
+        uses: "WyriHaximus/github-action-get-previous-tag@master"
+      - 
+        name: 'Git Tag'
+        run: echo ${{ steps.previoustag.outputs.tag }}
+      -
+        name: Docker build with latest tag
+        run: docker build -t quay.io/rdpanek/k6:latest -f Dockerfile .
+      -
+        name: List docker images
+        run: docker images
+      
+      # Push to Quay repository
+      - 
+        name: Login to Quay.io
+        run: docker login quay.io -u=${{ secrets.QUAY_USERNAME }} -p='${{ secrets.QUAY_PASS }}'
+      -
+        name: Re-tag docker image
+        run: docker tag quay.io/rdpanek/k6:latest quay.io/rdpanek/k6:"${{ steps.previoustag.outputs.tag }}"
+      -
+        name: Push new image do Quay.io
+        run: |
+          docker push quay.io/rdpanek/k6:"${{ steps.previoustag.outputs.tag }}"
+          docker push quay.io/rdpanek/k6:latest
