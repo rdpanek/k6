@@ -1,5 +1,5 @@
-# k6
-> Open source load testing tool and SaaS for engineering teams
+# k6.io
+> https://k6.io/ Open source load testing tool and SaaS for engineering teams
 
 ## Bookmarks
 - https://k6.io/
@@ -10,11 +10,14 @@
 
 
 # How to get
-- `docker pull loadimpact/k6`
+- `docker pull loadimpact/k6` or for OSX
 - `brew install k6`
 
 # How To Run
-`docker run --name k6 -i --rm loadimpact/k6 run - < testCases/k6io.js --vus 10 --duration 30s`
+- `k6 run baseline.js ` or
+- `docker run --name k6 -i --rm -v $(pwd):/home/k6/ loadimpact/k6:0.31.1 run baseline.js --no-usage-report`
+
+# How to run with clone public git repository with tests
 
 # How To Run with ENV
 `docker run --name k6 -i --rm -e SERVER=192.168.1.176 -e PORT=9200 rdpanek/k6:0.26.2 run - < elasticsearch/elasticsearch.js`
