@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k6-config
+  namespace: k6
+data:
+  git.test.repository: https://github.com/rdpanek/k6.git

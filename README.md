@@ -19,8 +19,11 @@
 - `GIT_REVISION` e.q. `04a28b8`
 - `TEST_PLAN_NAME` e.q. `baseline.js`
 
-# How To Run with ENV
-`docker run --name k6 -i --rm -e SERVER=192.168.1.176 -e PORT=9200 rdpanek/k6:0.26.2 run - < elasticsearch/elasticsearch.js`
+# How to run in k8s
+
+- create namespace `kubectl create namespace k6`
+- update count of replicas in `k8s/deployment.yaml`
+
 
 # Convert HAR to K6 test
 `k6 convert -O elasticsearch/syntexHomePage.js /Users/rdpanek/HTDOCS/teststack/k6/elasticsearch/har/www.syntex.cz.har`

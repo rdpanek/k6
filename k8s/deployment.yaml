@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: canarytrace-listener-rules
-  namespace: canarytrace
+  name: k6-tp-config
+  namespace: k6
 data:
-  configurator: |
-    {
+  config: |
+    const config = {
       scenarios: {
         homepage: {
           executor: 'constant-vus',
@@ -28,15 +28,21 @@ data:
       //noConnectionReuse: true,
       //rps: 500,
     }
+
+    module.exports = {
+      config
+    }
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: k6
+  namespace: k6
 spec:
   selector:
     matchLabels:
       app: k6
+  serviceName: "generator"
   replicas: 2
   template:
     metadata:
@@ -55,27 +61,19 @@ spec:
             topologyKey: "kubernetes.io/hostname"
       containers:
       - name: k6
-        image: loadimpact/k6:0.31.1
+        image: quay.io/rdpanek/k6:1.0.3
         env:
         - name: GIT_REVISION
-          value: "4e44e02"
+          value: "5d00086"
         - name: TEST_PLAN_NAME
           value: "baseline.js"
-        - name: GIT_REPOSITORY
+        - name: GIT_TEST_REPOSITORY
           valueFrom:
             configMapKeyRef:
-              name: jmeter-config
-              key: repository
-        - name: GIT_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: jmeter-config
-              key: repository.host
-        - name: GIT_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: jmeter-config
-              key: repository.port
+              name: k6-config
+              key: git.test.repository
+        - name: ENV_PRINT
+          value: "allow"
         resources:
           requests:
             memory: "2Gi"
@@ -83,4 +81,16 @@ spec:
           limits:
             memory: "2Gi"
             cpu: "2"
+        volumeMounts:
+          - name: k6-tp-config
+            mountPath: /home/k6/config/default.js
+            subPath: config
+            readOnly: true
         imagePullPolicy: "Always"
+      volumes:
+        - name: k6-tp-config
+          configMap:
+            name: k6-tp-config
+            items:
+              - key: config
+                path: config
