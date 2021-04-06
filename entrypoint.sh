@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [ "${ENV_PRINT}" == "allow" ] ; then
+  echo "Print all environment variables"
+  env
+fi
+
 # setup git
 export GIT_TRACE=0
 
