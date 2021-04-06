@@ -1,13 +1,6 @@
 # k6.io
 > https://k6.io/ Open source load testing tool and SaaS for engineering teams
 
-## Bookmarks
-- https://k6.io/
-- Samples https://github.com/loadimpact/k6/tree/master/samples
-- Awesome https://github.com/k6io/awesome-k6
-- Apache Kafka https://medium.com/k6-io/integrating-k6-with-apache-kafka-eda96ea7c749
-- Tool review 2020 https://k6.io/blog/comparing-best-open-source-load-testing-tools
-
 
 # How to get
 - `docker pull loadimpact/k6` or for OSX
@@ -19,7 +12,12 @@
 
 # How to run with clone public git repository with tests
 > this command download repository, checkout on revision and run k6
-- `docker run --name k6 -it --rm -e GIT_TEST_REPOSITORY=https://github.com/rdpanek/k6.git -e GIT_REVISION=04a28b8 quay.io/rdpanek/k6:1.0.0`
+- `docker run --name k6 -it --rm -e GIT_TEST_REPOSITORY=https://github.com/rdpanek/k6.git -e GIT_REVISION=04a28b8 -e TEST_PLAN_NAME=baseline.js quay.io/rdpanek/k6:1.0.1`
+
+**Available ENVs**
+- `GIT_TEST_REPOSITORY` e.g. https://github.com/rdpanek/k6.git
+- `GIT_REVISION` e.q. `04a28b8`
+- `TEST_PLAN_NAME` e.q. `baseline.js`
 
 # How To Run with ENV
 `docker run --name k6 -i --rm -e SERVER=192.168.1.176 -e PORT=9200 rdpanek/k6:0.26.2 run - < elasticsearch/elasticsearch.js`
@@ -27,8 +25,7 @@
 # Convert HAR to K6 test
 `k6 convert -O elasticsearch/syntexHomePage.js /Users/rdpanek/HTDOCS/teststack/k6/elasticsearch/har/www.syntex.cz.har`
 
-# Notes
-
+## Notes
 
 - test summary / metrics guide https://k6.io/docs/using-k6/metrics
 - features https://hub.docker.com/r/loadimpact/k6/
@@ -59,3 +56,10 @@ export let options = {
 };
 ```
 - konverze z HAR, postman, jmeter, Swagger/OpenAPI
+
+## Bookmarks
+- https://k6.io/
+- Samples https://github.com/loadimpact/k6/tree/master/samples
+- Awesome https://github.com/k6io/awesome-k6
+- Apache Kafka https://medium.com/k6-io/integrating-k6-with-apache-kafka-eda96ea7c749
+- Tool review 2020 https://k6.io/blog/comparing-best-open-source-load-testing-tools
