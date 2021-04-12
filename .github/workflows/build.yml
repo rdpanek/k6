@@ -1,4 +1,4 @@
-name: Build Canarytrace Professional
+name: Build k6
 
 # run paralel three jobs [elastic, demoWeb, build Canary image with temp tag]
 # fourth job wait on above jobs are done
