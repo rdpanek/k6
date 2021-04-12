@@ -7,7 +7,7 @@
 - `brew install k6`
 
 # How To Run
-- `k6 run baseline.js ` or
+- `k6 run baseline.js` or
 - `docker run --name k6 -i --rm -v $(pwd):/home/k6/ loadimpact/k6:0.31.1 run baseline.js --no-usage-report`
 
 # How to run with clone public git repository with tests
