@@ -66,3 +66,49 @@ export let options = {
 - Awesome https://github.com/k6io/awesome-k6
 - Apache Kafka https://medium.com/k6-io/integrating-k6-with-apache-kafka-eda96ea7c749
 - Tool review 2020 https://k6.io/blog/comparing-best-open-source-load-testing-tools
+
+
+## Prometheus & Grafana
+
+1). Build k6 with xk6-prometheus
+
+- https://github.com/szkiba/xk6-prometheus
+  - Build or download https://github.com/k6io/xk6/releases
+
+```bash
+# build
+./xk6_0.4.1_mac_amd64/xk6 build --with github.com/szkiba/xk6-prometheus@latest
+```
+
+2). Run k6 with prometheus module
+
+```bash
+./k6 run baseline.js --out 'prometheus=namespace=k6' --no-usage-report
+```
+
+3). endpoint `/metrics` are available on `5656` port
+
+- http://localhost:5656/metrics
+
+4). prepare Prometheus configuration
+
+- `prometheus/prometheus.yml`
+
+5). run Prometheus
+
+```bash
+docker run --name prometheus --net k6 -d --rm -v $(PWD)/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml -p 9090:9090 prom/prometheus  
+```
+
+and check that target k6 us up http://localhost:9090/targets
+
+6). Run Grafana
+
+```bash
+docker run -d --rm --net k6 --name grafana -p 3000:3000 grafana/grafana
+```
+
+7). Login to Grafana and import dashboard
+
+- http://localhost:3000/
+- import dashboard from `grafana/` directory
