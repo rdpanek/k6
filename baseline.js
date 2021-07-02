@@ -9,7 +9,7 @@ import {config} from './config/default.js'
 // options
 export let options = config
 
-const baseURL = 'https://canarytrace.com/'
+const baseURL = 'http://localhost'
 
 export function setup() {}
 

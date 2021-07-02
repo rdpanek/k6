@@ -1,11 +1,16 @@
 const config = {
   scenarios: {
-    homepage: {
-      executor: 'constant-vus',
-      vus: 1,
-      duration: '1m',
-      gracefulStop: '0s',
-      tags: { test_type: 'homepage' },
+    homePageScenario: {
+      executor: 'ramping-vus',
+      startVUs: 1,
+      stages: [
+        { duration: '10s', target: 1 },
+        { duration: '40s', target: 200 },
+        { duration: '600s', target: 400 },
+        { duration: '600s', target: 800 },
+        { duration: '600s', target: 100 },
+      ],
+      gracefulRampDown: '0s',
       exec: 'homePageScenario',
     },
   },
