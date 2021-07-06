@@ -10,14 +10,23 @@
 - `k6 run baseline.js` or
 - `docker run --name k6 -i --rm -v $(pwd):/home/k6/ loadimpact/k6:0.31.1 run baseline.js --no-usage-report`
 
-# How to run with clone public git repository with tests
+### How to run with clone public git repository with tests**
 > this command download repository, checkout on revision and run k6
-- `docker run --name k6 -it --rm -e GIT_TEST_REPOSITORY=https://github.com/rdpanek/k6.git -e GIT_REVISION=04a28b8 -e TEST_PLAN_NAME=baseline.js quay.io/rdpanek/k6:1.0.1`
+- `docker run --name k6 -it --rm -e GIT_TEST_REPOSITORY=https://github.com/rdpanek/k6.git -e GIT_REVISION=04a28b8 quay.io/rdpanek/k6:1.0.1`
 
-**Available ENVs**
+**ENV for clone repository with tests and run k6**
+
 - `GIT_TEST_REPOSITORY` e.g. https://github.com/rdpanek/k6.git
 - `GIT_REVISION` e.q. `04a28b8`
-- `TEST_PLAN_NAME` e.q. `baseline.js`
+- `TEST_PLAN_NAME` e.q. `baseline.js`, default is `baseline.js`
+
+**Run with local tests**
+
+You can run tests from your localhost.
+```
+docker run --name k6 -it --rm --net k6 -v $(pwd):/home/k6/ -e ENV_PRINT=allow quay.io/rdpanek/k6:0.33.0.1
+```
+- `TEST_PLAN_NAME` e.q. `baseline.js`, default is `baseline.js`
 
 # How to run in k8s
 
