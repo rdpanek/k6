@@ -9,7 +9,7 @@ import {config} from './config/default.js'
 // options
 export let options = config
 
-const baseURL = 'http://localhost'
+const baseURL = 'http://battle'
 
 export function setup() {}
 

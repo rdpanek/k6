@@ -8,7 +8,7 @@ COPY entrypoint.sh /
 RUN chmod -R a+rwX $K6_HOME && \
     apk add git
 
-# install support for aws cli
+# install dependencies
 RUN apk add --no-cache \
     python3 \
     py3-pip \

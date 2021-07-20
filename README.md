@@ -79,6 +79,12 @@ export let options = {
 
 ## Prometheus & Grafana
 
+0). Run test web
+```bash
+docker run -d --rm -p 80:80 -p 443:443 --net k6 --name battle quay.io/canarytrace/battle-page:1.1
+```
+
+
 1). Build k6 with xk6-prometheus
 
 - https://github.com/szkiba/xk6-prometheus
