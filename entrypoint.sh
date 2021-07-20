@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [[ -z "${TEST_PLAN_NAME}" ]]; then
   export TEST_PLAN_NAME='baseline.js'
@@ -11,21 +11,19 @@ fi
 
 if [[ -z "${GIT_TEST_REPOSITORY}" ]]; then
   echo "Without git clone."
-  ls -lah $K6_HOME
+  ls -lah $K6_TESTS
 else
   echo "Git clone your repository with tests."
   # setup git
   export GIT_TRACE=0
 
-  git config --global credential.helper '!aws codecommit credential-helper $@'
-  git config --global credential.UseHttpPath true
-  cd $K6_HOME
+  cd $K6_TESTS
   git clone $GIT_TEST_REPOSITORY $K6_HOME
-  ls -lah $K6_HOME
+  ls -lah $K6_TESTS
 
   # select version of test by revision or branch name
-  ( cd $K6_HOME && git fetch && git checkout $GIT_REVISION )
+  ( cd $K6_TESTS && git fetch && git checkout $GIT_REVISION )
 fi
 
 # start k6
-k6 run $TEST_PLAN_NAME --no-usage-report
+k6 run ${K6_TESTS}/${TEST_PLAN_NAME} --no-usage-report --out 'prometheus=namespace=k6' --no-usage-report

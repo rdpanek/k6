@@ -28,4 +28,4 @@ scrape_configs:
   follow_redirects: true
   static_configs:
   - targets:
-    - 192.168.1.7:5656
+    - k6:5656

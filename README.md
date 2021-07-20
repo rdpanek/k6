@@ -127,3 +127,22 @@ docker run -d --rm --net k6 --name grafana -p 3000:3000 grafana/grafana
 
 - http://localhost:3000/
 - import dashboard from `grafana/` directory
+
+## K6 with prometheus
+
+1). Build
+```bash
+docker build -t quay.io/rdpanek/k6:0.33.0-prometheus -f Dockerfile-prometheus .
+```
+
+2). Run from localhost
+
+```bash
+docker run --name k6 --rm -it -v $(pwd):/opt --net k6 --entrypoint /bin/sh -p 5656:5656 quay.io/rdpanek/k6:0.33.0-prometheus
+```
+
+3). Run from localhost with prometheus HTTP exporter
+
+```bash
+docker run --name k6 --rm -it -v $(pwd):/opt --net k6 -p 5656:5656 -e TEST_PLAN_NAME=baseline.js quay.io/rdpanek/k6:0.33.0-prometheus
+```
