@@ -3,7 +3,7 @@ FROM golang:1.16.5
 USER root
 
 ENV K6_HOME /home/k6
-ENV K6_TESTS /opt/
+ENV K6_TESTS /opt
 
 RUN mkdir $K6_HOME && \
     chmod -R a+rwX $K6_HOME && \

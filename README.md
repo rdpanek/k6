@@ -146,3 +146,8 @@ docker run --name k6 --rm -it -v $(pwd):/opt --net k6 --entrypoint /bin/sh -p 56
 ```bash
 docker run --name k6 --rm -it -v $(pwd):/opt --net k6 -p 5656:5656 -e TEST_PLAN_NAME=baseline.js quay.io/rdpanek/k6:0.33.0-prometheus
 ```
+
+4). Run with Prometheus HTTP exporter
+```bash
+docker run --name k6 --rm -it --net k6 -e GIT_TEST_REPOSITORY=https://github.com/rdpanek/k6.git -e GIT_REVISION=64cd2431df27af82ddd6a0b07c59e1d0ea599b73 -p 5656:5656 quay.io/rdpanek/k6:0.33.0-prometheus
+```

@@ -18,7 +18,7 @@ else
   export GIT_TRACE=0
 
   cd $K6_TESTS
-  git clone $GIT_TEST_REPOSITORY $K6_HOME
+  git clone $GIT_TEST_REPOSITORY $K6_TESTS
   ls -lah $K6_TESTS
 
   # select version of test by revision or branch name
@@ -26,4 +26,4 @@ else
 fi
 
 # start k6
-k6 run ${K6_TESTS}/${TEST_PLAN_NAME} --no-usage-report --out 'prometheus=namespace=k6' --no-usage-report
+k6 run ${K6_TESTS}/${TEST_PLAN_NAME} --out 'prometheus=namespace=k6' --no-usage-report
