@@ -12,20 +12,12 @@
 
 ### How to run with clone public git repository with tests**
 > this command download repository, checkout on revision and run k6
-- `docker run --name k6 -it --rm -e GIT_TEST_REPOSITORY=https://github.com/rdpanek/k6.git -e GIT_REVISION=04a28b8 quay.io/rdpanek/k6:1.0.1`
+- `docker run --name k6 -it --rm -e GIT_TEST_REPOSITORY=https://github.com/rdpanek/k6.git -e GIT_REVISION=ce9ce3b -e TEST_PLAN_NAME=baseline.js quay.io/rdpanek/k6:1.0.1`
 
 **ENV for clone repository with tests and run k6**
 
 - `GIT_TEST_REPOSITORY` e.g. https://github.com/rdpanek/k6.git
-- `GIT_REVISION` e.q. `04a28b8`
-- `TEST_PLAN_NAME` e.q. `baseline.js`, default is `baseline.js`
-
-**Run with local tests**
-
-You can run tests from your localhost.
-```
-docker run --name k6 -it --rm --net k6 -v $(pwd):/home/k6/ -e ENV_PRINT=allow quay.io/rdpanek/k6:0.33.0.1
-```
+- `GIT_REVISION` e.q. `ce9ce3b`
 - `TEST_PLAN_NAME` e.q. `baseline.js`, default is `baseline.js`
 
 # How to run in k8s
@@ -112,7 +104,7 @@ docker run -d --rm -p 80:80 -p 443:443 --net k6 --name battle quay.io/canarytrac
 5). run Prometheus
 
 ```bash
-docker run --name prometheus --net k6 -d --rm -v $(PWD)/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml -p 9090:9090 prom/prometheus  
+docker run --name prometheus --net k6 -d --rm -v $(PWD)/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml -p 9090:9090 prom/prometheus
 ```
 
 and check that target k6 us up http://localhost:9090/targets
@@ -135,19 +127,13 @@ docker run -d --rm --net k6 --name grafana -p 3000:3000 grafana/grafana
 docker build -t quay.io/rdpanek/k6:0.33.0-prometheus -f Dockerfile-prometheus .
 ```
 
-2). Run from localhost
-
-```bash
-docker run --name k6 --rm -it -v $(pwd):/opt --net k6 --entrypoint /bin/sh -p 5656:5656 quay.io/rdpanek/k6:0.33.0-prometheus
-```
-
-3). Run from localhost with prometheus HTTP exporter
+2). Run from localhost with prometheus HTTP exporter
 
 ```bash
 docker run --name k6 --rm -it -v $(pwd):/opt --net k6 -p 5656:5656 -e TEST_PLAN_NAME=baseline.js quay.io/rdpanek/k6:0.33.0-prometheus
 ```
 
-4). Run with Prometheus HTTP exporter
+3). Run with Prometheus HTTP exporter
 ```bash
 docker run --name k6 --rm -it --net k6 -e GIT_TEST_REPOSITORY=https://github.com/rdpanek/k6.git -e GIT_REVISION=64cd2431df27af82ddd6a0b07c59e1d0ea599b73 -p 5656:5656 quay.io/rdpanek/k6:0.33.0-prometheus
 ```
