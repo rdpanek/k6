@@ -18,4 +18,4 @@ ls -lah $K6_HOME
 ( cd $K6_HOME && git fetch && git checkout $GIT_REVISION )
 
 # start k6
-k6 run $TEST_PLAN_NAME --no-usage-report
+k6 run $TEST_PLAN_NAME --out=statsd --no-usage-report
