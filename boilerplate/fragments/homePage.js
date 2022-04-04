@@ -31,10 +31,10 @@ const openHomepage = function(config = fail(`login: missing config.`)) {
     )
 
     check(response, {
-      '1-open: response code was 200': (res) => res.status == 200,
+      '1-openHomepage: response code was 200': (res) => res.status == 200,
     })
     let successOpen = check(response, {
-      '1-open: page contains title': (res) => res.body.includes(`BattlePage by Canarytrace`)
+      '1-openHomepage: page contains title': (res) => res.body.includes(`BattlePage by Canarytrace`)
     })
     if (successOpen) successHomePageRate.add(successOpen)
     if (!successOpen) unSuccessHomePageRate.add(successOpen)
