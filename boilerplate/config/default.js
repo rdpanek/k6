@@ -4,7 +4,7 @@ const config = {
       executor: 'ramping-vus',
       startVUs: 1,
       stages: [
-        { duration: '120s', target: 3 },
+        { duration: '60s', target: 3 },
       ],
       gracefulRampDown: '0s',
       exec: 'homePageScenario',
