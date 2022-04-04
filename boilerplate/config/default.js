@@ -1,28 +1,12 @@
-const config = {
-  scenarios: {
-    homePageScenario: {
-      executor: 'ramping-vus',
-      startVUs: 1,
-      stages: [
-        { duration: '60s', target: 3 },
-      ],
-      gracefulRampDown: '0s',
-      exec: 'homePageScenario',
-    },
-  },
-  batchPerHost: 6,
-  thresholds: { 
-    http_req_connecting: ['p(90) > 3000'],
-    http_req_waiting: ['p(90) > 1000']
-  },
-  //discardResponseBodies: true,
-  //duration: '3m', // without WM
-  //iterations: 10,
-  //httpDebug: 'full',
-  //noConnectionReuse: true,
-  //rps: 500,
-}
+import { fail } from 'k6'
 
-module.exports = {
-  config
+export default (credentials, environment, traceId = '00000000000000000000000000000000') => {
+  if (!credentials.user || !credentials.pass) { fail("config: USER od PASS is missing.") }
+  if (!environment) { fail("config: ENVIRONMENT is missing.") }
+
+  return {
+    credentials: credentials,
+    traceId,
+    environment
+  }
 }

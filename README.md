@@ -7,6 +7,25 @@
 - `docker pull loadimpact/k6` or for OSX
 - `brew install k6`
 
+## Prerequisites for development
+
+1). Install k6.io locally - better for debugging
+
+2). Install https://direnv.net/ for ENV management
+
+Example of .envrc
+```
+export TRACE_ID=4346a6987e64b4affc69352e83aed2a3
+export POD_TOTAL=10
+export POD_ID=0
+export ENVIRONMENT=http://example.com/
+export USER=ABC
+export PASS=XYZ
+```
+and allow config via `eval "$(direnv hook zsh)"`
+
+or set TRACE_ID manually. TRACE_ID can be any string of 32 characters.
+
 # How To Run
 - `k6 run boilerplate/baseline.js` or
 - `docker run --name k6 -i --rm -v $(pwd):/home/k6/ grafana/k6:0.37.0 run boilerplate/baseline.js --no-usage-report`
@@ -17,6 +36,7 @@
 
 ## Checkout latest version
 https://quay.io/repository/rdpanek/k6?tab=tags
+
 
 **ENV for clone repository with tests and run k6**
 
