@@ -17,7 +17,7 @@ const openHomepage = function(config = fail(`login: missing config.`)) {
     timeout: 20000,
   })
 
-  group('open', function () {
+  group('BattlePage open', function () {
     response = session.get(
       '/',
       {

@@ -23,8 +23,8 @@ export let options = {
   thresholds: { 
     http_req_failed: ['rate<10'],
     http_req_duration: ['p(90)<3000'], // 90% of requests should be below 400ms
-    'group_duration{group:::open}': ['p(95)<3000'], // 95% of login transactions should be below 2s
-    'checks{validation:open}': ['rate>0.95']
+    'group_duration{group:::BattlePage open}': ['p(95)<3000'], // 95% of login transactions should be below 2s
+    'checks{validation:BattlePage open}': ['rate>0.95']
   }
 }
 

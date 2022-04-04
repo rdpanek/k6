@@ -3,40 +3,46 @@
 - https://github.com/grafana/k6/releases release notes.
 - https://hub.docker.com/r/grafana/k6/tags Docker images. 
 
-# How to get
+# How to get k6.io
 - `docker pull loadimpact/k6` or for OSX
 - `brew install k6`
 
-## Prerequisites for development
+# Start with development environment
 
 1). Install k6.io locally - better for debugging
 
 2). Install https://direnv.net/ for ENV management
 
-Example of .envrc
 ```
+# Example of .envrc
+
 export TRACE_ID=4346a6987e64b4affc69352e83aed2a3
 export POD_TOTAL=10
 export POD_ID=0
-export ENVIRONMENT=http://example.com/
+export ENVIRONMENT=http://localhost/
 export USER=ABC
 export PASS=XYZ
 ```
 and allow config via `eval "$(direnv hook zsh)"`
 
-# How To Run
-- `k6 run boilerplate/baseline.js` or
-- `docker run --name k6 -i --rm -v $(pwd):/home/k6/ -e ENVIRONMENT=$ENVIRONMENT grafana/k6:0.37.0 run boilerplate/baseline.js --no-usage-report`
+3). Create `docker network create k6`
 
-### How to run with clone public git repository with tests**
+4). Run BattlePage (demo web)
+`docker run -d --rm -p 80:80 -p 443:443 --net k6 --name battle quay.io/canarytrace/battle-page:1.3`
+
+## How To Run
+- `k6 run boilerplate/baseline.js` or
+- `docker run --name k6 -i --rm -v $(pwd):/home/k6/ --net k6 -e ENVIRONMENT=http://battle/ grafana/k6:0.37.0 run boilerplate/baseline.js --no-usage-report`
+
+## How to run with clone public git repository with tests**
 > this command download repository, checkout on revision and run k6
 - `docker run --name k6 -it --rm -e GIT_TEST_REPOSITORY=https://github.com/rdpanek/k6.git -e GIT_REVISION=ce9ce3b -e TEST_PLAN_NAME=baseline.js quay.io/rdpanek/k6:1.0.1`
 
-## Checkout latest version
+### Checkout latest version
 https://quay.io/repository/rdpanek/k6?tab=tags
 
 
-**ENV for clone repository with tests and run k6**
+# Environment variables
 
 - `GIT_TEST_REPOSITORY` e.g. https://github.com/rdpanek/k6.git
 - `GIT_REVISION` e.q. `ce9ce3b`
