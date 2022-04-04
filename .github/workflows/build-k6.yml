@@ -30,8 +30,10 @@ jobs:
         name: 'Git Tag'
         run: echo ${{ steps.previoustag.outputs.tag }}
       -
-        name: Docker build with latest tag
-        run: docker build -t quay.io/rdpanek/k6:latest -f Dockerfile .
+        name: Build docker image
+        run: |
+          cd build/k6
+          docker build -t quay.io/rdpanek/k6:latest -f Dockerfile .
       -
         name: List docker images
         run: docker images
