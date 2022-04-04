@@ -24,8 +24,6 @@ export PASS=XYZ
 ```
 and allow config via `eval "$(direnv hook zsh)"`
 
-or set TRACE_ID manually. TRACE_ID can be any string of 32 characters.
-
 # How To Run
 - `k6 run boilerplate/baseline.js` or
 - `docker run --name k6 -i --rm -v $(pwd):/home/k6/ -e ENVIRONMENT=$ENVIRONMENT grafana/k6:0.37.0 run boilerplate/baseline.js --no-usage-report`
@@ -43,6 +41,7 @@ https://quay.io/repository/rdpanek/k6?tab=tags
 - `GIT_TEST_REPOSITORY` e.g. https://github.com/rdpanek/k6.git
 - `GIT_REVISION` e.q. `ce9ce3b`
 - `TEST_PLAN_NAME` e.q. `baseline.js`, default is `baseline.js`
+- `TRACE_ID` must be any string of 32 characters. Default is `00000000000000000000000000000000`
 
 # How to run in k8s
 
