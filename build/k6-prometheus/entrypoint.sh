@@ -35,7 +35,7 @@ else
 fi
 
 # start k6
-k6 run ${K6_TESTS}/${TEST_PLAN_NAME} --no-usage-report
+k6 run ${K6_TESTS}/${TEST_PLAN_NAME} --out 'prometheus=namespace=k6' --no-usage-report
 
 if [ "${STOP_AFTER_TEST}" == "allow" ] ; then
   sleep 3600

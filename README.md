@@ -30,9 +30,9 @@ and allow config via `eval "$(direnv hook zsh)"`
 4). Run BattlePage (demo web)
 `docker run -d --rm -p 80:80 -p 443:443 --net k6 --name battle quay.io/canarytrace/battle-page:1.3`
 
-## How To Run
+## How to run
 - `k6 run boilerplate/baseline.js` or
-- `docker run --name k6 -i --rm -v $(pwd):/home/k6/ --net k6 -e ENVIRONMENT=http://battle/ grafana/k6:0.37.0 run boilerplate/baseline.js --no-usage-report`
+- `docker run --name k6 -i --rm -v $(pwd):/home/k6/ --net k6 -e ENVIRONMENT=http://battle/ quay.io/rdpanek/k6:0.37.0`
 
 ## How to run with clone public git repository with tests**
 > this command download repository, checkout on revision and run k6

@@ -1,7 +1,6 @@
 FROM grafana/k6:0.37.0
 
 USER root
-
 ENV K6_HOME /home/k6
 
 COPY entrypoint.sh /
