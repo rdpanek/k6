@@ -121,7 +121,7 @@ docker build -t quay.io/rdpanek/k6:0.33.0-prometheus -f Dockerfile-prometheus .
 2). Run from localhost with prometheus HTTP exporter
 
 ```bash
-docker run --name k6 --rm -it -v $(pwd):/opt --net k6 -p 5656:5656 -e TEST_PLAN_NAME=baseline.js quay.io/rdpanek/k6:0.33.0-prometheus
+docker run --name k6 --rm -it -v $(pwd):/home/k6 --net k6 -p 5656:5656 -e TEST_PLAN_NAME=baseline.js quay.io/rdpanek/k6:0.37.0.3-prometheus
 ```
 
 3). Run with Prometheus HTTP exporter
