@@ -62,12 +62,6 @@ https://quay.io/repository/rdpanek/k6?tab=tags
 
 ## Prometheus & Grafana
 
-0). Run test web
-```bash
-docker run -d --rm -p 80:80 -p 443:443 --net k6 --name battle quay.io/canarytrace/battle-page:1.1
-```
-
-
 1). Build k6 with xk6-prometheus
 
 - https://github.com/szkiba/xk6-prometheus
@@ -75,7 +69,7 @@ docker run -d --rm -p 80:80 -p 443:443 --net k6 --name battle quay.io/canarytrac
 
 ```bash
 # build
-./xk6_0.4.1_mac_amd64/xk6 build --with github.com/szkiba/xk6-prometheus@latest
+./xk6_0.6.1_mac_arm64/xk6 build --with github.com/szkiba/xk6-prometheus@latest
 ```
 
 2). Run k6 with prometheus module
