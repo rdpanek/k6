@@ -39,6 +39,8 @@ const openHomepage = function(config = fail(`login: missing config.`)) {
     if (successOpen) successHomePageRate.add(successOpen)
     if (!successOpen) unSuccessHomePageRate.add(successOpen)
 
+    //console.log('Response time was ' + String(response.timings.duration) + ' ms');
+
   })
 }
 
