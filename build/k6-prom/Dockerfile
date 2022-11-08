@@ -27,8 +27,8 @@ RUN mkdir $K6_HOME && \
     wget https://github.com/grafana/xk6/releases/download/v0.7.0/xk6_0.7.0_linux_amd64.tar.gz && \
     tar -xvzf xk6_0.7.0_linux_amd64.tar.gz && \
     
-    # build prometheus module
-    ./xk6 build --with github.com/szkiba/xk6-prometheus@latest && \
+    # build sql & prom module
+    ./xk6 build --with github.com/grafana/xk6-output-prometheus-remote@latest && \
     rm -rf xk6_0.7.0_linux_amd64.tar.gz xk6 LICENSE README.md && \
     ln -s /opt/k6 /usr/bin/k6
 
