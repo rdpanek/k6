@@ -35,7 +35,7 @@ else
 fi
 
 # start k6
-k6 run $TEST_PLAN_NAME --out 'prometheus=namespace=k6' $@
+k6 run $TEST_PLAN_NAME $@
 
 if [ "${STOP_AFTER_TEST}" == "allow" ] ; then
   sleep 3600
