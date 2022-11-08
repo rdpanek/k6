@@ -24,14 +24,13 @@ RUN mkdir $K6_HOME && \
     # install xk6 and budild with prometheus module
     # install xk6
     cd /opt && \
-    wget https://github.com/grafana/xk6/releases/download/v0.6.1/xk6_0.6.1_linux_amd64.tar.gz && \
-    tar -xvzf xk6_0.6.1_linux_amd64.tar.gz && \
+    wget https://github.com/grafana/xk6/releases/download/v0.7.0/xk6_0.7.0_linux_amd64.tar.gz && \
+    tar -xvzf xk6_0.7.0_linux_amd64.tar.gz && \
     
     # build prometheus module
     ./xk6 build --with github.com/szkiba/xk6-prometheus@latest && \
-    rm -rf xk6_0.6.1_linux_amd64.tar.gz xk6 LICENSE README.md && \
+    rm -rf xk6_0.7.0_linux_amd64.tar.gz xk6 LICENSE README.md && \
     ln -s /opt/k6 /usr/bin/k6
-
 
 WORKDIR $K6_HOME
 ENTRYPOINT ["/entrypoint.sh"]
