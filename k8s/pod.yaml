@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: k6
+  namespace: k6
+spec:
+  containers:
+    - name: k6
+      image: quay.io/rdpanek/k6:0.37.0.3-prometheus
+      env:
+      - name: GIT_REVISION
+        value: "009ad73"
+      - name: TEST_PLAN_NAME
+        value: "baseline.js"
+      - name: GIT_TEST_REPOSITORY
+        valueFrom:
+          configMapKeyRef:
+            name: k6-config
+            key: git.test.repository
+      - name: ENV_PRINT
+        value: "allow"
+      resources:
+        requests:
+          memory: "2Gi"
+          cpu: "1"
+        limits:
+          memory: "6Gi"
+          cpu: "2"
+      imagePullPolicy: "Always"
+  restartPolicy: "Never"
