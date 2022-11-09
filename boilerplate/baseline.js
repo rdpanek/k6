@@ -13,7 +13,7 @@ export let options = {
       startVUs: 1,
       stages: [
         { duration: '300s', target: 10 },
-        { duration: '600s', target: 10 }
+        { duration: '6000s', target: 10 }
       ],
       gracefulRampDown: '0s',
       tags: { scenario: 'homePage' },

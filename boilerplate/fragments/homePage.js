@@ -1,9 +1,9 @@
 import { check, group, fail } from 'k6'
-import { Rate } from 'k6/metrics'
-import { Httpx } from 'https://jslib.k6.io/httpx/0.0.3/index.js';
+import { Rate, Trend } from 'k6/metrics'
+import { Httpx } from 'https://jslib.k6.io/httpx/0.0.3/index.js'
 
-const successHomePageRate = new Rate('success_homepage_rate');
-const unSuccessHomePageRate = new Rate('unsuccess_homepage_rate');
+const loadHomePageCheck = new Rate('homepage_check')
+const loadHomePageTime = new Trend('homepage_time')
 
 let response
 
@@ -36,11 +36,8 @@ const openHomepage = function(config = fail(`login: missing config.`)) {
     let successOpen = check(response, {
       '1-openHomepage: page contains title': (res) => res.body.includes(`BattlePage by Canarytrace`)
     })
-    if (successOpen) successHomePageRate.add(successOpen)
-    if (!successOpen) unSuccessHomePageRate.add(successOpen)
-
-    //console.log('Response time was ' + String(response.timings.duration) + ' ms');
-
+    loadHomePageCheck.add(successOpen)
+    loadHomePageTime.add(response.timings.duration)
   })
 }
 
