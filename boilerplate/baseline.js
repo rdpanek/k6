@@ -1,12 +1,16 @@
 import { sleep } from 'k6'
 import configuration from './config/default.js'
 const credentials = { user: __ENV.USER, pass: __ENV.PASS,}
-const config = configuration(credentials, __ENV.ENVIRONMENT, __ENV.TRACE_ID)
+const config = configuration(credentials, __ENV.ENVIRONMENT, __ENV.TRACE_ID, __ENV.TAG)
 
 // snippets
 import {openHomepage} from './fragments/homePage.js'
 
 export let options = {
+  //systemTags: ['status', 'method', 'url'],
+  tags: {
+    source: config.tag
+  },
   scenarios: {
     homePageScenario: {
       executor: 'ramping-vus',

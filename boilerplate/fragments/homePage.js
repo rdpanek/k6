@@ -21,6 +21,9 @@ const openHomepage = function(config = fail(`login: missing config.`)) {
     response = session.get(
       '/',
       {
+        tags: {
+          requests: "homePage",
+        },
         headers: {
           'upgrade-insecure-requests': '1',
           'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="100", "Google Chrome";v="100"',
@@ -35,7 +38,7 @@ const openHomepage = function(config = fail(`login: missing config.`)) {
     })
     let successOpen = check(response, {
       '1-openHomepage: page contains title': (res) => res.body.includes(`BattlePage by Canarytrace`)
-    })
+    }, { responseCheck: "homePage" })
     loadHomePageCheck.add(successOpen)
     loadHomePageTime.add(response.timings.duration)
   })
