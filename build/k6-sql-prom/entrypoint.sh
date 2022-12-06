@@ -36,7 +36,10 @@ fi
 
 # start k6
 k6 run $TEST_PLAN_NAME $@
+ECODE=$?
 
 if [ "${STOP_AFTER_TEST}" == "allow" ] ; then
   sleep 3600
 fi
+
+exit $ECODE
