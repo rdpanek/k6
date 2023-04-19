@@ -1,6 +1,9 @@
 /**
  * Basic example
- * - k6 run tc-web-service.js
+ * https://k6.io/docs/get-started/running-k6/
+ * 
+ * How to run
+ * - k6 run 01-web-service-basics.js
  * - docker run --rm -i grafana/k6 run - <01-web-service-basics.js
  * 
  * Add more time and VUs
