@@ -4,6 +4,27 @@
 
 ## Examples
 
+### Environment variables management
+- Install https://direnv.net/ for ENV management
+
+```bash
+# Example of .envrc
+export POD_TOTAL=10
+export POD_ID=0
+export ENVIRONMENT=http://localhost/
+export USER=ABC
+export PASS=XYZ
+export GIT_TEST_REPOSITORY=https://github.com/rdpanek/k6.git
+export GIT_REVISION='ce9ce3b'
+# default is `baseline.js`
+export TEST_PLAN_NAME='baseline.js'
+# Must be any string of 32 characters.
+export TRACE_ID='00000000000000000000000000000000'
+```
+- and allow config via `eval "$(direnv hook zsh)"`
+- run `direnv allow .`
+- run k6 `k6 run your-testcase.js`
+
 ### BattlePage
 
 Create user defined network
