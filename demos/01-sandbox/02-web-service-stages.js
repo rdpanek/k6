@@ -3,8 +3,8 @@
  * https://k6.io/docs/get-started/running-k6/
  * 
  * How to run
- * - k6 run 02-web-service-stages.js
- * - docker run --rm -i grafana/k6 run - <02-web-service-stages.js
+ * - k6 run demos/01-sandbox/02-web-service-stages.js
+ * - docker run --rm -i grafana/k6 run - <demos/01-sandbox/02-web-service-stages.js
  */
 
 import http from 'k6/http';

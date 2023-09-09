@@ -3,11 +3,11 @@
  * https://k6.io/docs/get-started/running-k6/
  * 
  * How to run
- * - k6 run 01-web-service-basics.js
- * - docker run --rm -i grafana/k6 run - <01-web-service-basics.js
+ * - k6 run demos/01-sandbox/01-web-service-basics.js
+ * - docker run --rm -i grafana/k6 run - <demos/01-sandbox/01-web-service-basics.js
  * 
  * Add more time and VUs
- * - k6 run --vus 10 --duration 30s 01-web-service-basics.js
+ * - k6 run --vus 10 --duration 30s demos/01-sandbox/01-web-service-basics.js
  */
 
 import http from 'k6/http';
