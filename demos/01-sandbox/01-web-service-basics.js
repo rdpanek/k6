@@ -10,6 +10,9 @@
  * 
  * How to run with Docker
  * - docker run --rm -i grafana/k6 run - <demos/01-sandbox/01-web-service-basics.js
+ * 
+ * How to run with Proxy
+ * - HTTPS_PROXY=http://192.168.0.249:9090 k6 run demos/01-sandbox/01-web-service-basics.js
  */
 
 import http from 'k6/http';
@@ -31,7 +34,6 @@ export const options = {
   duration: '30s',
 }
 */
-
 /**
  * - In real-world scenarios, you would set stages know as "ramp-up" and "ramp-down". Uncomment the stages variable.
  */
@@ -42,6 +44,22 @@ export const options = {
     { duration: '1m30s', target: 10 },
     { duration: '20s', target: 0 },
   ],
+};
+*/
+
+/**
+ * executor: "externally-controlled" is used for scenarios where you want to control the number of VUs externally, e.g. from the command line.
+ */
+/*
+export let options = {
+  scenarios: {
+    adjustable_at_will: {
+      executor: "externally-controlled",
+      vus: 0,
+      maxVUs: 20,
+      duration: "10m",
+    },
+  }
 };
 */
 
