@@ -4,3 +4,4 @@ k6
 xk6_0.6.1_mac_arm64/
 xk6-output-prometheus-remote/
 .DS_Store
+database.db
