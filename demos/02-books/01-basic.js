@@ -31,14 +31,14 @@ export default function () {
     if (__ITER == 0) {
         http.get('http://localhost:3000/books/běžná kniha');
         http.put('http://localhost:3000/book/1', JSON.stringify({ type: 'běžná kniha', title: 'Upravená Běžná Kniha', author: 'Upravený Autor 1' }), { headers: { 'Content-Type': 'application/json' } });
-        //http.del('http://localhost:3000/book/1');
+        http.del('http://localhost:3000/book/1');
     }
 
     // Scénář 2: Testování API pro e-knihy
     if (__ITER == 1) {
         http.get('http://localhost:3000/books/e-kniha');
         http.put('http://localhost:3000/book/2', JSON.stringify({ type: 'e-kniha', title: 'Upravená E-Kniha', author: 'Upravený Autor 2' }), { headers: { 'Content-Type': 'application/json' } });
-        //http.del('http://localhost:3000/book/2');
+        http.del('http://localhost:3000/book/2');
     }
 
     sleep(1);
