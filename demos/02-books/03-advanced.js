@@ -58,9 +58,13 @@ export let options = {
   },
   thresholds: { 
     http_req_failed: ['rate<10'],
-    http_req_duration: ['p(90)<3000'], // 90% of requests should be below 400ms
+    http_req_duration: ['p(90)<3000'], // 90% of requests should be below 3000ms
     'group_duration{group:::Check classic books api}': ['p(95)<1000'],
-    'group_duration{group:::Check ebooks api}': ['p(95)<1000'],
+    'group_duration{group:::Check ebooks api}': ['p(95)<1000'], 
+    'classicBookLoaded_time': ['p(95) < 1000'], // 95th percentile should be below 1000ms
+    'eBookLoaded_time': ['p(95) < 1000'], // 95th percentile should be below 1000ms
+    'classicBookExist': ['rate>0.95'], // success rate should be higher than 95%
+    'eBookExist': ['rate>0.95'], // success rate should be higher than 95%
   }
 };
 

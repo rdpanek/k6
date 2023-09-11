@@ -2,8 +2,10 @@ import { check, group, fail } from 'k6'
 import { Rate, Trend } from 'k6/metrics'
 import { Httpx } from 'https://jslib.k6.io/httpx/0.0.3/index.js'
 
-const openAppCheck = new Rate('openApp_check')
-const openAppTime = new Trend('openApp_time')
+const classicBookExistCheck = new Rate('classicBookExist')
+const eBookExistCheck = new Rate('eBookExist')
+const classicBookLoadedTime = new Trend('classicBookLoaded_time')
+const eBookLoadedTime = new Trend('eBookLoaded_time')
 let response
 
 const classicBooks = function(config = fail(`login: missing config.`), data) {
@@ -22,9 +24,11 @@ const classicBooks = function(config = fail(`login: missing config.`), data) {
     check(response, {
       'Get books status code is 200': (r) => r.status === 200
     });
-    check(response, {
+    let classicBookExist = check(response, {
       'Get books contains name of classic book': (res) => res.body.includes(`běžná kniha`)
     });
+    classicBookExistCheck.add(classicBookExist)
+    classicBookLoadedTime.add(response.timings.duration)
 
     response = session.put('/book/1', JSON.stringify({ 
       type: 'běžná kniha', 
@@ -58,9 +62,11 @@ const ebooks = function(config = fail(`login: missing config.`), data) {
     check(response, {
       'Get ebook status code is 200': (r) => r.status === 200
     });
-    check(response, {
+    let eBookExist = check(response, {
       'Get books contains name of ebook': (res) => res.body.includes(`e-kniha`)
     });
+    eBookLoadedTime.add(response.timings.duration)
+    eBookExistCheck.add(eBookExist)
 
     response = session.put('/book/2', JSON.stringify({ 
       type: 'e-kniha', 
