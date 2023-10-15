@@ -1,6 +1,9 @@
 {
   "image": "mcr.microsoft.com/devcontainers/universal:2",
   "features": {
-    "ghcr.io/devcontainers/features/git:1": {}
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/meaningful-ooo/devcontainer-features/homebrew:2": {
+		"shallowClone": true
+	}
   }
 }
