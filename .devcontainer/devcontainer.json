@@ -1,6 +1,12 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/universal:2",
-  "features": {
-    "ghcr.io/devcontainers/features/git:1": {}
-  }
+  "name": "K6 Dev Container",
+  "dockerFile": "Dockerfile",
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash"
+  },
+  "postCreateCommand": "echo 'eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"' >> ~/.bashrc && echo 'export PATH=$PATH:/home/linuxbrew/.linuxbrew/bin/k6' >> ~/.bashrc",
+  "runArgs": [
+    "--cpus", "2"
+  ],
+  "extensions": []
 }
