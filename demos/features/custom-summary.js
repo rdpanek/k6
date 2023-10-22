@@ -8,13 +8,17 @@
 
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+import { Trend } from 'k6/metrics';
 import {textSummary} from 'https://jslib.k6.io/k6-summary/0.0.4/index.js';
+
+const myTrend = new Trend('function_xyz');
 
 export default function () {
   let res = http.get('https://test.k6.io')
   check(res, {
     'is status 200': (r) => r.status === 200,
   })
+  myTrend.add(res.timings.waiting);
   sleep(1)
 }
 
@@ -31,7 +35,7 @@ export function handleSummary(data) {
 
   return {
     'stdout': textSummary(data, { indent: '→', enableColors: true }),
-    'stdout': latency_message,
+    //'stdout': latency_message,
     'summary.json': JSON.stringify(data),
   }
 }
