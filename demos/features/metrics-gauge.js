@@ -1,6 +1,6 @@
 /**
  * Custom Summary
- * https://k6.io/docs/javascript-api/k6-metrics/counter/
+ * https://k6.io/docs/javascript-api/k6-metrics/gauge/
  * 
  * How to run
  * k6 run demos/features/metrics-gauge.js
