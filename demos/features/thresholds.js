@@ -35,6 +35,7 @@ export const options = {
     'Content_OK': ['rate>0.95'], // underscore is required
     // Trend: Percentiles, averages, medians, and minimums
     // must be within specified milliseconds.
+    // multiple thresholds for one metric
     'RTT': ['p(99)<300', 'p(70)<250', 'avg<200', 'med<150', 'min<100'],
   },
 };
