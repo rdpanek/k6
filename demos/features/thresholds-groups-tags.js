@@ -1,6 +1,6 @@
 /**
  * Custom Summary
- * https://k6.io/docs/javascript-api/k6-metrics/trend/
+ * https://k6.io/docs/using-k6/thresholds/
  * 
  * How to run
  * k6 run demos/features/thresholds-groups-tags.js
