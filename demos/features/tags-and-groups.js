@@ -11,8 +11,8 @@ import exec from 'k6/execution';
 
 import http from 'k6/http';
 import { Trend } from 'k6/metrics';
-import { check, group } from 'k6';
-import { tagWithCurrentStageIndex } from 'https://jslib.k6.io/k6-utils/1.3.0/index.js';
+import { check, group, sleep } from 'k6';
+import { tagWithCurrentStageIndex, tagWithCurrentStageProfile } from 'https://jslib.k6.io/k6-utils/1.3.0/index.js';
 
 const myTrend = new Trend('my_trend');
 
@@ -39,7 +39,11 @@ let res
 export default function () {
 
   // Stage tags
+  // Example: "stage":"2"
   tagWithCurrentStageIndex();
+  // stage_profile: ramp-up, steady, ramp-down
+  // Example: "stage_profile":"steady"
+  tagWithCurrentStageProfile();
 
   // Add tag to request metric data
   res = http.get('https://httpbin.test.k6.io/', {
@@ -66,7 +70,18 @@ export default function () {
     res = http.get('https://test-api.k6.io');
     check(res, { 'status is 200': (r) => r.status === 200 });
   });
-  console.log(exec.vu.metrics.tags)
+  //console.log(exec.vu.metrics.tags)
   delete exec.vu.metrics.tags.containerGroup;
+
+  // Groups
+  group('visit login page', function () {
+    sleep(1);
+  });
+  group('authenticate', function () {
+    // ...
+  });
+  group('checkout process', function () {
+    // ...
+  });
 
 }
