@@ -54,5 +54,7 @@ export default function () {
     res = http.get('https://test-api.k6.io');
     check(res, { 'status is 200': (r) => r.status === 200 });
   });
+  console.log(exec.vu.metrics.tags)
+
   delete exec.vu.metrics.tags.containerGroup;
 }
