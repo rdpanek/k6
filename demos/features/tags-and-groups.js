@@ -12,6 +12,7 @@ import exec from 'k6/execution';
 import http from 'k6/http';
 import { Trend } from 'k6/metrics';
 import { check, group } from 'k6';
+import { tagWithCurrentStageIndex } from 'https://jslib.k6.io/k6-utils/1.3.0/index.js';
 
 const myTrend = new Trend('my_trend');
 
@@ -24,11 +25,22 @@ export const options = {
     'http_reqs{containerGroup:main}': ['count==3'], // for code defined tags
     'http_req_duration{containerGroup:main}': ['max<1000'], // for code defined tags
   },
+  stages: [
+    { target: 1, duration: '5s' }, // tagWithCurrentStageIndex(); will add tag stage:0
+    { target: 5, duration: '5s' }, // tagWithCurrentStageIndex(); will add tag stage:1
+    { target: 5, duration: '5s' }, // tagWithCurrentStageIndex(); will add tag stage:2
+    { target: 5, duration: '5s' }, // tagWithCurrentStageIndex(); will add tag stage:3
+    { target: 5, duration: '5s' }, // tagWithCurrentStageIndex(); will add tag stage:4
+  ],
 };
 
 let res
 
 export default function () {
+
+  // Stage tags
+  tagWithCurrentStageIndex();
+
   // Add tag to request metric data
   res = http.get('https://httpbin.test.k6.io/', {
     tags: {
@@ -55,6 +67,6 @@ export default function () {
     check(res, { 'status is 200': (r) => r.status === 200 });
   });
   console.log(exec.vu.metrics.tags)
-
   delete exec.vu.metrics.tags.containerGroup;
+
 }
