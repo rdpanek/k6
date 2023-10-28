@@ -76,6 +76,8 @@ export const options = {
     'http_req_duration{expected_response:true}': ['p(95)<200'],
     'http_req_duration{test_type:api}': ['p(95)<250', 'p(99)<350'],
     'http_req_duration{scenario:my_api_test_2}': ['p(99)<300'],
+    // droped iterations
+    dropped_iterations: ['rate<0.1'], // míra zahozených iterací nesmí být více jak 10%
   },
 };
 
