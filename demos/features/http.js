@@ -8,6 +8,10 @@
 import http from 'k6/http';
 import { check } from 'k6';
 
+http.setResponseCallback(
+  http.expectedStatuses(406, 500, { min: 200, max: 204 }, 302, { min: 305, max: 405 })
+);
+
 const url1 = 'https://api.k6.io/v3/account/me';
 const url2 = 'https://httpbin.test.k6.io/get';
 const apiToken = 'f232831bda15dd233c53b9c548732c0197619a3d3c451134d9abded7eb5bb195';
