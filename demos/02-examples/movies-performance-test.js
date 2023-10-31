@@ -2,7 +2,7 @@
  * Marvel Movies Home Work
  * 
  * How to run
- * k6 run demos/02-examples/movies-performance-test.js 
+ * k6 run demos/02-examples/movies-performance-test.js
  * 
  */
 import http from 'k6/http';
@@ -16,14 +16,21 @@ import { uuidv4 } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js';
 
 // create setup function which delete index movies from elasticsearch and check that index is deleted
 export function setup() {
-  // delete index movies
-  let res = http.del('http://localhost:9200/movies');
-
-  // check that index is deleted
-  check(res, {
-    'status was 200': (r) => r.status === 200,
-    'Response message 200 OK': (r) => r.status_text == '200 OK'
-  });
+  // exist index movies
+  let res = http.get('http://localhost:9200/movie');
+  /**
+   * {"status":404,"error":{"root_cause":[{"index_uuid":"_na_","index":"movie","type":"index_not_found_exception","reason":"no such index [movie]","resource.type":"index_or_alias","resource.id":"movie"}],"type":"index_not_found_exception","reason":"no such index [movie]","resource.type":"index_or_alias","resource.id":"movie","index_uuid":"_na_","index":"movie"}}
+   */
+  if (res.json().status !== 200) {
+    // delete index movies
+    res = http.del('http://localhost:9200/movies');
+  
+    // check that index is deleted
+    check(res, {
+      'status was 200': (r) => r.status === 200,
+      'Response message 200 OK': (r) => r.status_text == '200 OK'
+    });
+  }
 }
 
 
@@ -74,9 +81,7 @@ export default function () {
 
   // Získání seznamu indexů
   let res = http.get('http://localhost:9200/_cat/indices?format=json&pretty=true');
-  console.log('Indices:', res.body);
 
-  console.log(res.json())
   // INFO[0005] [{"pri.store.size":"10.3kb","docs.count":"4","status":"open","index":"movies","uuid":"PQWFR7rWRtCX1es6GIpNvA","pri":"1","rep":"1","docs.deleted":"0","store.size":"10.3kb","health":"yellow"}]  source=console
 
   // Kontrola, zda byl požadavek úspěšný
