@@ -8,6 +8,25 @@
 import http from 'k6/http';
 import { check } from 'k6';
 
+// import library for pause between requests
+import { sleep } from 'k6';
+
+// import library for generate unique id
+import { uuidv4 } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js';
+
+// create setup function which delete index movies from elasticsearch and check that index is deleted
+export function setup() {
+  // delete index movies
+  let res = http.del('http://localhost:9200/movies');
+
+  // check that index is deleted
+  check(res, {
+    'status was 200': (r) => r.status === 200,
+    'Response message 200 OK': (r) => r.status_text == '200 OK'
+  });
+}
+
+
 export default function () {
   let documents = [
     {
@@ -40,12 +59,29 @@ export default function () {
     },
   ];
 
+  // Odeslání dokumentů ve smyčce
   for (let document of documents) {
-    let res = http.post('http://localhost:9200/movies/_doc', JSON.stringify(document), { headers: { 'Content-Type': 'application/json' } });
+    let res = http.post(`http://localhost:9200/movies/_doc/${uuidv4()}`, JSON.stringify(document), { headers: { 'Content-Type': 'application/json' } });
 
     // Kontrola, zda byl požadavek úspěšný
     check(res, {
       'status was 201': (r) => r.status === 201,
+      'Response message 201 Created': (r) => r.status_text == '201 Created'
     });
   }
+
+  sleep(5)
+
+  // Získání seznamu indexů
+  let res = http.get('http://localhost:9200/_cat/indices?format=json&pretty=true');
+  console.log('Indices:', res.body);
+
+  console.log(res.json())
+  // INFO[0005] [{"pri.store.size":"10.3kb","docs.count":"4","status":"open","index":"movies","uuid":"PQWFR7rWRtCX1es6GIpNvA","pri":"1","rep":"1","docs.deleted":"0","store.size":"10.3kb","health":"yellow"}]  source=console
+
+  // Kontrola, zda byl požadavek úspěšný
+  check(res, {
+    'status was 200': (r) => r.status === 200,
+    'index movies contains four records': (r) => r.json()[0]['docs.count'] === '4',
+  });
 }
