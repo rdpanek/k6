@@ -32,6 +32,10 @@ Pokračování:
 	- Přidat parametrizaci (environment variables) pro:
 		- uri Elasticsearch
 		- název indexu
+ 
+**Hodnocení výsledků**
+- Připrav si manažerské shrnutí s informací, jak test dopadl (ústně)
+- Funkční test společně s instrukcemi jak jej spustit pushni do vlastního Git repozitáře na Githubu
 
 
 ### Prerekvizity
