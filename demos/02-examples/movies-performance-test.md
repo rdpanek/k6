@@ -47,11 +47,16 @@ docker run --name elasticsearch --rm -d -p 9200:9200 -p 9300:9300 -e "discovery.
 ```
 
 Úspornější Elasticsearch
+- snížení CPU na `0.5` core
 ```bash
 docker run --name elasticsearch --rm -d -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -e ES_SETTING_XPACK_SECURITY_ENABLED=false -e ES_SETTING_ACTION_DESTRUCTIVE__REQUIRES__NAME=false --cpus=".5" -m="1g" docker.elastic.co/elasticsearch/elasticsearch:8.4.1 bin/elasticsearch -Enetwork.host=0.0.0.0
 ```
 
+- pro aktuální spotřebu prostředků můžete použít `docker stats`.
+- pokud to bude potřeba, můžete Elasticsearch zastavit `docker kill elasticsearch`, navýšit parametr `--cpus` třeba na jeden core `--cpus="1"` a Elasticsearch znovu spustit.
+
 **Log**
+
 Pokud budeš mít problém se spuštěním Elasticsearch, podívej se do logu co to píše
 ```bash
 docker logs -f elasticsearch
