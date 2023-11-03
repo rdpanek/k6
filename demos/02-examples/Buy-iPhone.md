@@ -9,8 +9,7 @@ Nasadili jsme do našeho e-shopu novou kategorii s iphony, je potřeba napsat us
 
 **NFR**
 - Test1:
-
-        - Prostředí https://www.iwant.cz/
+	- Prostředí https://www.iwant.cz/
 	- Každý request musí být odbaven do 1000ms.
 	- Našeptávač musí vrátit více jako 10 iphonů.
 	- Číselník vrátí více jak 1000 filtrů.
