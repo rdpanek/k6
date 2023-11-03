@@ -13,7 +13,7 @@ Potřebuješ nasadit Elasticsearch pro společnost, která se zabývá hodnocen�
 - TestCase poběží 5minut.
 
 **Ostatní požadavky**
-- Všechny hodnoty v testu musí být parametrizovatelný.
+- Všechny hodnoty v testu (konfigurace) musí být parametrizovatelný.
 
 **Jak udělat**
 - ID filmu může být unikátní a nebo můžete použít čítač
