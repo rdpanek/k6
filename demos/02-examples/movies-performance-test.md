@@ -6,8 +6,8 @@ Potřebuješ nasadit Elasticsearch pro společnost, která se zabývá hodnocen�
 **NFR**
 - Zadávání filmů a hodnocení
 	- Do Elasticsearch se bude zapisovat v peaku maximálně 50 filmů za minutu.
-	- Ke každému filmu veřejnost přidávat hodnocení, maximálně 100 hodnocení za minutu.
-		- Každý film má své unikátní ID a hodnocení používá ID filmu, takže k testovacím datům je potřeba přidat `movie_id`
+	- Ke každému filmu veřejnost přidávat hodnocení, maximálně 100 hodnocení za minutu. Ukázku najdeš na konci zadání.
+		- Každý film a má své unikátní ID a hodnocení používá ID filmu, takže k testovacím datům je potřeba přidat `movie_id`
 - Obecně chceme aby REST-API Elasticsearch odpovídal vždy maximálně do 200ms.
 - Chybovost maximálně 1%
 - TestCase poběží 5minut.
@@ -86,5 +86,16 @@ curl localhost:9200
     "minimum_index_compatibility_version" : "7.0.0"
   },
   "tagline" : "You Know, for Search"
+}
+```
+
+**Ukázka hodnocení**
+```javascript
+const fanReview = {
+  movie_title: 'Iron Man',
+  review_date: '2022-01-01',
+  fan_name: 'John Doe',
+  fan_review: 'Great movie! I really enjoyed the performance of Robert Downey Jr.',
+  fan_rating: 8.5,
 }
 ```
