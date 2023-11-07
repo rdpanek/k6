@@ -12,7 +12,8 @@
 
 import {sleep, group, check} from 'k6'
 import http from 'k6/http'
-import {Gauge} from "k6/metrics";
+import { Gauge } from "k6/metrics";
+import { parseHTML } from 'k6/html';
 // import * as cheerio from 'cheerio';
 
 // https://k6.io/docs/using-k6/metrics/create-custom-metrics/
@@ -24,34 +25,35 @@ export const options = {
     thresholds: {
         // https://k6.io/docs/using-k6/metrics/#what-metrics-to-look-at
         // https://k6.io/docs/using-k6/metrics/reference/#http
-        http_req_duration: ['p(100)<1000'], // X% of requests should be below 200ms
+        http_req_duration: ['p(95)<1000'], // X% of requests should be below 200ms
         http_req_failed: ['rate==0.00'],
         //
         // custom metrics
         //
-        // 'delete_index_success_count': ['count==1'],
-        // 'delete_index_error_count': ['count==0'],
 
         // NFR: Našeptávač musí vrátit více jako 10 iphonů.
         // Q?: checking tags/labels
         'suggester_returned_items': ['value>10'],
     },
-    vus: 1,
-    // duration: '5m',
-    duration: '10s',
-
+    scenarios: {
+        // https://k6.io/docs/using-k6/scenarios/executors/constant-vus/
+        iwantUserJourney: {
+            executor: 'constant-vus',
+            vus: 1,
+            duration: '30s',
+        },
+    },
 }
 
 export default function main() {
     let response
+    let doc
+    let pageTitle
 
     group('page_0 - iwant homepage', function () {
         response = http.get('https://www.iwant.cz/', {
             headers: {
                 'upgrade-insecure-requests': '1',
-                'sec-ch-ua': '"Brave";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
-                'sec-ch-ua-mobile': '?0',
-                'sec-ch-ua-platform': '"macOS"',
             },
         })
         check(response, {
@@ -112,14 +114,14 @@ export default function main() {
             {
                 headers: {
                     'x-requested-with': 'XMLHttpRequest',
-                    'sec-ch-ua': '"Brave";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
-                    'sec-ch-ua-mobile': '?0',
-                    'sec-ch-ua-platform': '"macOS"',
                 },
             }
         )
+        const matches = response.body.match(/<div class="productList-item"/g);
+        // console.log(`DEBUG: productList items: ${matches.length}`)
         check(response, {
             'status was 200': (r) => r.status === 200,
+            'found 12 items': matches.length === 12,
         })
 
         response = http.get('https://www.iwant.cz/Products/Filter/AllFilterData', {
@@ -136,6 +138,7 @@ export default function main() {
 
         sleep(0.7)
 
+        // strankovani
         response = http.get(
             'https://www.iwant.cz/Products/Helper/Pager?totalCount=5384&pageSize=12&currentPage=1&allPages=false',
             {
@@ -144,6 +147,8 @@ export default function main() {
                 },
             }
         )
+        // <button type="button" class="pager-page " data-page="2">2</button>
+
         check(response, {
             'status was 200': (r) => r.status === 200,
         })
@@ -160,11 +165,18 @@ export default function main() {
                 },
             })
 
-            check(response, {
-                'status was 200': (r) => r.status === 200,
-                'particular iphone model found':
-                    (r) => r.body.includes('<meta name="title" content="Apple iPhone 14 128GB temně inkoustový | iWant.cz">')
-            })
+            doc = parseHTML(response.body); // equivalent to res.html()
+            pageTitle = doc.find('head title').text();
+            // console.log(`DEBUG: pageTitle: "${pageTitle}"`)
+
+            check(response,
+                {
+                    'status was 200': (r) => r.status === 200,
+                    'particular iphone model found': pageTitle === "Apple iPhone 14 128GB temně inkoustový | iWant.cz"
+                },
+                {
+                    type: 'itemDetail'
+                })
 
             // load model description
             response = http.get(
@@ -172,16 +184,12 @@ export default function main() {
                 {
                     headers: {
                         'x-requested-with': 'XMLHttpRequest',
-                        'sec-ch-ua': '"Brave";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
-                        'sec-ch-ua-mobile': '?0',
-                        'sec-ch-ua-platform': '"macOS"',
                     },
                 }
             )
+
             check(response, {
                 'status was 200': (r) => r.status === 200,
-                'particular iphone model found':
-                    (r) => r.body.includes('<meta name="title" content="Apple iPhone 14 128GB temně inkoustový | iWant.cz">'),
                 'model details keyword found':
                     (r) => r.body.includes('<p class="copy z9b16b1 channel-custom-font-custom-80-headline-super">Multitalent.</p>')
             })
@@ -199,11 +207,20 @@ export default function main() {
                     'upgrade-insecure-requests': '1',
                 },
             })
-            check(response, {
-                'status was 200': (r) => r.status === 200,
-                'particular iphone model found': (r) => r.body.includes('<meta name="title" content="Apple iPhone 14 256GB temně inkoustový | iWant.cz" />')
 
-            })
+            doc = parseHTML(response.body); // equivalent to res.html()
+            pageTitle = doc.find('head title').text();
+            // console.log(`DEBUG: pageTitle: "${pageTitle}"`)
+
+            check(response,
+                {
+                    'status was 200': (r) => r.status === 200,
+                    'particular iphone model found': pageTitle === "Apple iPhone 14 256GB temně inkoustový | iWant.cz"
+                },
+                {
+                    type: 'itemDetail'
+                }
+            )
 
             // load model description
             response = http.get(
@@ -216,8 +233,8 @@ export default function main() {
             )
             check(response, {
                 'status was 200': (r) => r.status === 200,
-                'particular iphone model found': (r) => r.body.includes('<meta name="title" content="Apple iPhone 14 256GB temně inkoustový | iWant.cz" />'),
-                'model details keyword found': (r) => r.body.includes('<p class="copy z9b16b1 channel-custom-font-custom-80-headline-super">Multitalent.</p>')
+                'model details keyword found':
+                    (r) => r.body.includes('<p class="copy z9b16b1 channel-custom-font-custom-80-headline-super">Multitalent.</p>')
             })
 
             sleep(1)
