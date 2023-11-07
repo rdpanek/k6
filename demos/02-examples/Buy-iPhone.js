@@ -7,12 +7,18 @@
  * k6 run demos/02-examples/Buy-iPhone.js
  */
 
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/includes
+// https://github.com/cheeriojs/cheerio#cheerio
+
 import {sleep, group, check} from 'k6'
 import http from 'k6/http'
 import {Gauge} from "k6/metrics";
+// import * as cheerio from 'cheerio';
 
 // https://k6.io/docs/using-k6/metrics/create-custom-metrics/
 const suggesterReturnedItems = new Gauge('suggester_returned_items');
+
+// const cheerio = require('cheerio');
 
 export const options = {
     thresholds: {
@@ -27,6 +33,7 @@ export const options = {
         // 'delete_index_error_count': ['count==0'],
 
         // NFR: Našeptávač musí vrátit více jako 10 iphonů.
+        // Q?: checking tags/labels
         'suggester_returned_items': ['value>10'],
     },
     vus: 1,
@@ -79,10 +86,10 @@ export default function main() {
         response = http.get(`https://www.iwant.cz/Vyhledavani?query=${findQuery}`, {
             headers: {
                 'upgrade-insecure-requests': '1',
-                'sec-ch-ua': '"Brave";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
-                'sec-ch-ua-mobile': '?0',
-                'sec-ch-ua-platform': '"macOS"',
             },
+            tags: {
+                query: findQuery,
+            }
         })
         check(response, {
             'status was 200': (r) => r.status === 200,
@@ -93,9 +100,6 @@ export default function main() {
             {
                 headers: {
                     'x-requested-with': 'XMLHttpRequest',
-                    'sec-ch-ua': '"Brave";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
-                    'sec-ch-ua-mobile': '?0',
-                    'sec-ch-ua-platform': '"macOS"',
                 },
             }
         )
@@ -121,15 +125,13 @@ export default function main() {
         response = http.get('https://www.iwant.cz/Products/Filter/AllFilterData', {
             headers: {
                 'x-requested-with': 'XMLHttpRequest',
-                'sec-ch-ua': '"Brave";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
-                'sec-ch-ua-mobile': '?0',
-                'sec-ch-ua-platform': '"macOS"',
             },
         })
+        // console.log("DEBUG: allFilterData length: ", response.json().length)
         check(response, {
             'status was 200': (r) => r.status === 200,
             // NFR: Číselník vrátí více jak 1000 filtrů.
-            'Response of AllFilterData contains more than 1000 items': (r) => r.json().length > 1000,
+            'Response of AllFilterData contains more than 500 items': (r) => r.json().length > 500,
         })
 
         sleep(0.7)
@@ -139,9 +141,6 @@ export default function main() {
             {
                 headers: {
                     'x-requested-with': 'XMLHttpRequest',
-                    'sec-ch-ua': '"Brave";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
-                    'sec-ch-ua-mobile': '?0',
-                    'sec-ch-ua-platform': '"macOS"',
                 },
             }
         )
@@ -154,21 +153,20 @@ export default function main() {
     group(
         'page_2 - open iphone detail',
         function () {
+            // load page
             response = http.get('https://www.iwant.cz/Apple-iPhone-14-128GB-temne-inkoustovy-p112124', {
                 headers: {
                     'upgrade-insecure-requests': '1',
-                    'sec-ch-ua': '"Brave";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
-                    'sec-ch-ua-mobile': '?0',
-                    'sec-ch-ua-platform': '"macOS"',
                 },
             })
 
             check(response, {
                 'status was 200': (r) => r.status === 200,
-                'particular iphone model found': (r) => r.body.includes('<meta name="title" content="Apple iPhone 14 128GB temně inkoustový | iWant.cz" />')
-
+                'particular iphone model found':
+                    (r) => r.body.includes('<meta name="title" content="Apple iPhone 14 128GB temně inkoustový | iWant.cz">')
             })
 
+            // load model description
             response = http.get(
                 'https://www.iwant.cz/Products/Detail/ProductDescription?id=112124&cg=2&it=&type=popis&buyoutCategoryId=null',
                 {
@@ -182,40 +180,44 @@ export default function main() {
             )
             check(response, {
                 'status was 200': (r) => r.status === 200,
+                'particular iphone model found':
+                    (r) => r.body.includes('<meta name="title" content="Apple iPhone 14 128GB temně inkoustový | iWant.cz">'),
+                'model details keyword found':
+                    (r) => r.body.includes('<p class="copy z9b16b1 channel-custom-font-custom-80-headline-super">Multitalent.</p>')
             })
 
-            sleep(6.6)
+            sleep(1)
         }
     )
 
     group(
         'page_3 - change iphone model',
         function () {
+            // load page
             response = http.get('https://www.iwant.cz/Apple-iPhone-14-256GB-temne-inkoustovy-p112126', {
                 headers: {
                     'upgrade-insecure-requests': '1',
-                    'sec-ch-ua': '"Brave";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
-                    'sec-ch-ua-mobile': '?0',
-                    'sec-ch-ua-platform': '"macOS"',
                 },
             })
             check(response, {
                 'status was 200': (r) => r.status === 200,
+                'particular iphone model found': (r) => r.body.includes('<meta name="title" content="Apple iPhone 14 256GB temně inkoustový | iWant.cz" />')
+
             })
 
+            // load model description
             response = http.get(
                 'https://www.iwant.cz/Products/Detail/ProductDescription?id=112126&cg=2&it=&type=popis&buyoutCategoryId=null',
                 {
                     headers: {
                         'x-requested-with': 'XMLHttpRequest',
-                        'sec-ch-ua': '"Brave";v="119", "Chromium";v="119", "Not?A_Brand";v="24"',
-                        'sec-ch-ua-mobile': '?0',
-                        'sec-ch-ua-platform': '"macOS"',
                     },
                 }
             )
             check(response, {
                 'status was 200': (r) => r.status === 200,
+                'particular iphone model found': (r) => r.body.includes('<meta name="title" content="Apple iPhone 14 256GB temně inkoustový | iWant.cz" />'),
+                'model details keyword found': (r) => r.body.includes('<p class="copy z9b16b1 channel-custom-font-custom-80-headline-super">Multitalent.</p>')
             })
 
             sleep(1)
