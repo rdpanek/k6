@@ -20,8 +20,6 @@ fi
 # setup git
 export GIT_TRACE=0
 
-git config --global credential.helper '!aws codecommit credential-helper $@'
-git config --global credential.UseHttpPath true
 cd $K6_HOME
 git clone $GIT_TEST_REPOSITORY $K6_HOME
 ls -lah $K6_HOME
@@ -31,7 +29,8 @@ ls -lah $K6_HOME
 ls -lah $K6_HOME
 
 # start k6
-k6 run $TEST_PLAN_NAME --out 'prometheus=namespace=k6' --no-usage-report
+cd $K6_HOME
+./k6 run $TEST_PLAN_NAME --out 'prometheus=namespace=k6' --no-usage-report
 
 if [ "${STOP_AFTER_TEST}" == "allow" ] ; then
   sleep 3600
