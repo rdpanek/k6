@@ -17,25 +17,20 @@ if [ "${ENV_PRINT}" == "allow" ] ; then
   env
 fi
 
-if [[ -z "${GIT_TEST_REPOSITORY}" ]]; then
-  echo "Without git clone."
-  ls -lah $K6_HOME
-else
-  echo "Git clone your repository with tests."
-  # setup git
-  export GIT_TRACE=0
+# setup git
+export GIT_TRACE=0
 
-  cd $K6_HOME
-  git clone $GIT_TEST_REPOSITORY $K6_HOME
-  ls -lah $K6_HOME
+cd $K6_HOME
+git clone $GIT_TEST_REPOSITORY $K6_HOME/tests
+ls -lah $K6_HOME/tests
 
-  # select version of test by revision or branch name
-  ( cd $K6_HOME && git fetch && git checkout $GIT_REVISION )
-  ls -lah $K6_HOME
-fi
+# select version of test by revision or branch name
+( cd $K6_HOME/tests && git fetch && git checkout $GIT_REVISION )
+ls -lah $K6_HOME/tests
 
 # start k6
-k6 run $TEST_PLAN_NAME $@
+cd $K6_HOME
+k6 run ./tests/$TEST_PLAN_NAME $@
 
 if [ "${STOP_AFTER_TEST}" == "allow" ] ; then
   sleep 3600

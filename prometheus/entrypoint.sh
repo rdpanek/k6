@@ -21,16 +21,16 @@ fi
 export GIT_TRACE=0
 
 cd $K6_HOME
-git clone $GIT_TEST_REPOSITORY $K6_HOME
-ls -lah $K6_HOME
+git clone $GIT_TEST_REPOSITORY $K6_HOME/tests
+ls -lah $K6_HOME/tests
 
 # select version of test by revision or branch name
-( cd $K6_HOME && git fetch && git checkout $GIT_REVISION )
-ls -lah $K6_HOME
+( cd $K6_HOME/tests && git fetch && git checkout $GIT_REVISION )
+ls -lah $K6_HOME/tests
 
 # start k6
 cd $K6_HOME
-./k6 run $TEST_PLAN_NAME --out 'prometheus=namespace=k6' --no-usage-report
+./k6 run ./tests/$TEST_PLAN_NAME --out 'prometheus=namespace=k6' --no-usage-report
 
 if [ "${STOP_AFTER_TEST}" == "allow" ] ; then
   sleep 3600
