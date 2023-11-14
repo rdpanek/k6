@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: k6
+  name: k6-baseline
   namespace: k6
 spec:
   selector:
     matchLabels:
       app: k6
   serviceName: "k6-load-generator"
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       labels:
@@ -26,24 +26,24 @@ spec:
             topologyKey: "kubernetes.io/hostname"
       containers:
       - name: k6
-        image: quay.io/rdpanek/k6:1.0.3
+        image: quay.io/rdpanek/k6:0.47.0
+        args: ["-o", "experimental-prometheus-rw", "--insecure-skip-tls-verify", "--no-usage-report"]
         env:
         - name: GIT_REVISION
-          value: "5d00086"
+          value: "a5329f2"
         - name: TEST_PLAN_NAME
-          value: "baseline.js"
+          value: "./demos/01-sandbox/04-prometheus.js"
         - name: GIT_TEST_REPOSITORY
-          valueFrom:
-            configMapKeyRef:
-              name: k6-config
-              key: git.test.repository
+          value: "https://github.com/rdpanek/k6.git"
         - name: ENV_PRINT
           value: "allow"
+        - name: K6_PROMETHEUS_RW_SERVER_URL
+          value: "http://prometheus.k6.svc.cluster.local/api/v1/write"
         resources:
           requests:
             memory: "2Gi"
             cpu: "1"
           limits:
-            memory: "2Gi"
+            memory: "6Gi"
             cpu: "2"
         imagePullPolicy: "Always"
