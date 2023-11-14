@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: k6
+  name: k6-baseline
   namespace: k6
 spec:
   containers:
@@ -10,7 +10,7 @@ spec:
       args: ["-o", "experimental-prometheus-rw", "--insecure-skip-tls-verify", "--no-usage-report"]
       env:
       - name: GIT_REVISION
-        value: "aa4bc8d"
+        value: "a5329f2"
       - name: TEST_PLAN_NAME
         value: "./demos/01-sandbox/04-prometheus.js"
       - name: GIT_TEST_REPOSITORY

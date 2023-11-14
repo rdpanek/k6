@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: k6-smoke
+  namespace: k6
+spec:
+  concurrencyPolicy: Replace
+  failedJobsHistoryLimit: 2
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: k6
+            image: quay.io/rdpanek/k6:0.47.0
+            args: ["-o", "experimental-prometheus-rw", "--insecure-skip-tls-verify", "--no-usage-report"]
+            env:
+            - name: GIT_REVISION
+              value: "aa4bc8d"
+            - name: TEST_PLAN_NAME
+              value: "./demos/01-sandbox/04-prometheus.js"
+            - name: GIT_TEST_REPOSITORY
+              value: "https://github.com/rdpanek/k6.git"
+            - name: ENV_PRINT
+              value: "allow"
+            - name: K6_PROMETHEUS_RW_SERVER_URL
+              value: "http://prometheus.k6.svc.cluster.local/api/v1/write"
+            resources:
+              requests:
+                memory: "1Gi"
+                cpu: "0.5"
+              limits:
+                memory: "2Gi"
+                cpu: "2"
+            imagePullPolicy: "Always"
+          restartPolicy: "Never"
