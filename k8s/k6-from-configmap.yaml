@@ -1,0 +1,11 @@
+apiVersion: k6.io/v1alpha1
+kind: TestRun
+metadata:
+  name: run-k6-from-configmap
+  namespace: k6
+spec:
+  parallelism: 4
+  script:
+    configMap:
+      name: my-operator-test
+      file: 00-template.js
