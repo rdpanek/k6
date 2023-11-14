@@ -25,7 +25,9 @@ export let options = {
       stages: [
         { duration: '1m', target: 10 },
         { duration: '1m', target: 10 },
-        { duration: '1m', target: 13 },
+        { duration: '10m', target: 13 },
+        { duration: '1m', target: 10 },
+        { duration: '10m', target: 5 },
         { duration: '1m', target: 0 },
       ],
       gracefulRampDown: '0s',
@@ -37,6 +39,8 @@ export let options = {
       stages: [
         { duration: '1m', target: 5 },
         { duration: '1m', target: 15 },
+        { duration: '4m', target: 5 },
+        { duration: '10m', target: 15 },
         { duration: '1m', target: 0 },
       ],
       gracefulRampDown: '0s',
