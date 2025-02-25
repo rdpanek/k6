@@ -12,6 +12,11 @@ if [[ -z "${TEST_PLAN_NAME}" ]]; then
   export TEST_PLAN_NAME='baseline.js'
 fi
 
+if [ -n "$GIT_TOKEN" ]; then
+  GIT_TEST_REPOSITORY=$(echo $GIT_TEST_REPOSITORY | sed "s#https://#https://oauth2:$GIT_TOKEN@#")
+  export GIT_TEST_REPOSITORY
+fi
+
 if [ "${ENV_PRINT}" == "allow" ] ; then
   echo "Print all environment variables"
   env
