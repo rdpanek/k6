@@ -1,4 +1,4 @@
-FROM grafana/k6:0.47.0
+FROM grafana/k6:0.57.0
 
 USER root
 ENV K6_HOME /home/k6
