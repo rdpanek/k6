@@ -1,52 +1,56 @@
 name: Build k6
 
-# run paralel three jobs [elastic, demoWeb, build Canary image with temp tag]
-# fourth job wait on above jobs are done
-# run E2E test Canarytrace smoke
-# push to quay repository
-
-# build only on push to master branch
 on:
   push:
     branches: master
 
-jobs:
-  
+jobs:  
   Build:
     runs-on: ubuntu-latest
-
     steps:
-      # Build docker image
       -
         name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - 
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+    
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_PAT }}
       -
         name: 'Get Previous Tag'
         id: previoustag
         uses: "WyriHaximus/github-action-get-previous-tag@master"
-      - 
-        name: 'Git Tag'
-        run: echo ${{ steps.previoustag.outputs.tag }}
+        with:
+          fallback: 1.0.0
       -
         name: Build docker image
         run: |
-          cd build/k6
-          docker build -t quay.io/rdpanek/k6:latest -f Dockerfile .
+          echo "Using TAG: ${{ steps.previoustag.outputs.tag }}"
+          docker build --build-arg VERSION=${{ steps.previoustag.outputs.tag }} -f ./build/k6/Dockerfile -t ghcr.io/rdpanek/k6:-${{ steps.previoustag.outputs.tag }} .
+          docker tag ghcr.io/rdpanek/k6:-${{ steps.previoustag.outputs.tag }} ghcr.io/rdpanek/k6:-latest
       -
         name: List docker images
         run: docker images
       
-      # Push to Quay repository
       - 
-        name: Login to Quay.io
-        run: docker login quay.io -u=${{ secrets.QUAY_USERNAME }} -p='${{ secrets.QUAY_PASS }}'
-      -
-        name: Re-tag docker image
-        run: docker tag quay.io/rdpanek/k6:latest quay.io/rdpanek/k6:"${{ steps.previoustag.outputs.tag }}"
-      -
-        name: Push new image do Quay.io
-        run: |
-          docker push quay.io/rdpanek/k6:"${{ steps.previoustag.outputs.tag }}"
-          docker push quay.io/rdpanek/k6:latest
+        name: Publish
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          build-args: |
+            VERSION=${{ steps.previoustag.outputs.tag }}
+          builder: ${{ steps.buildx.outputs.name }}
+          file: ./build/k6/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/rdpanek/k6-${{ steps.previoustag.outputs.tag}}
+            ghcr.io/rdpanek/k6-latest
+          platforms: |
+            linux/amd64
