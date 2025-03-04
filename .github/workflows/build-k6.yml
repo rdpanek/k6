@@ -33,8 +33,8 @@ jobs:
         name: Build docker image
         run: |
           echo "Using TAG: ${{ steps.previoustag.outputs.tag }}"
-          docker build --build-arg VERSION=${{ steps.previoustag.outputs.tag }} -f ./build/k6/Dockerfile -t ghcr.io/rdpanek/k6:-${{ steps.previoustag.outputs.tag }} .
-          docker tag ghcr.io/rdpanek/k6:-${{ steps.previoustag.outputs.tag }} ghcr.io/rdpanek/k6:-latest
+          docker build --build-arg VERSION=${{ steps.previoustag.outputs.tag }} -f ./build/k6/Dockerfile -t ghcr.io/rdpanek/k6:${{ steps.previoustag.outputs.tag }} .
+          docker tag ghcr.io/rdpanek/k6:${{ steps.previoustag.outputs.tag }} ghcr.io/rdpanek/k6:latest
       -
         name: List docker images
         run: docker images
@@ -50,7 +50,7 @@ jobs:
           file: ./build/k6/Dockerfile
           push: true
           tags: |
-            ghcr.io/rdpanek/k6-${{ steps.previoustag.outputs.tag}}
-            ghcr.io/rdpanek/k6-latest
+            ghcr.io/rdpanek/k6:${{ steps.previoustag.outputs.tag}}
+            ghcr.io/rdpanek/k6:latest
           platforms: |
             linux/amd64
