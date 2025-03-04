@@ -34,7 +34,7 @@ jobs:
         run: |
           echo "Using TAG: ${{ steps.previoustag.outputs.tag }}"
           docker build --build-arg VERSION=${{ steps.previoustag.outputs.tag }} -f ./build/k6-prom/Dockerfile -t ghcr.io/rdpanek/k6:${{ steps.previoustag.outputs.tag }}.prom .
-          docker tag ghcr.io/rdpanek/k6:${{ steps.previoustag.outputs.tag }} ghcr.io/rdpanek/k6:latest.prom
+          docker tag ghcr.io/rdpanek/k6:${{ steps.previoustag.outputs.tag }}.prom ghcr.io/rdpanek/k6:prom.latest
       -
         name: List docker images
         run: docker images
@@ -51,6 +51,6 @@ jobs:
           push: true
           tags: |
             ghcr.io/rdpanek/k6:${{ steps.previoustag.outputs.tag}}.prom
-            ghcr.io/rdpanek/k6:latest.prom
+            ghcr.io/rdpanek/k6:prom.latest
           platforms: |
             linux/amd64
