@@ -1,0 +1,56 @@
+name: Build k6 prometheus exporter
+
+on:
+  push:
+    branches: master
+
+jobs:  
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - 
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+    
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_PAT }}
+      -
+        name: 'Get Previous Tag'
+        id: previoustag
+        uses: "WyriHaximus/github-action-get-previous-tag@master"
+        with:
+          fallback: 1.0.0
+      -
+        name: Build docker image
+        run: |
+          echo "Using TAG: ${{ steps.previoustag.outputs.tag }}"
+          docker build --build-arg VERSION=${{ steps.previoustag.outputs.tag }} -f ./build/k6-prom/Dockerfile -t ghcr.io/rdpanek/k6:${{ steps.previoustag.outputs.tag }}.prom .
+          docker tag ghcr.io/rdpanek/k6:${{ steps.previoustag.outputs.tag }} ghcr.io/rdpanek/k6:latest.prom
+      -
+        name: List docker images
+        run: docker images
+      
+      - 
+        name: Publish
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          build-args: |
+            VERSION=${{ steps.previoustag.outputs.tag }}
+          builder: ${{ steps.buildx.outputs.name }}
+          file: ./build/k6-prom/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/rdpanek/k6:${{ steps.previoustag.outputs.tag}}.prom
+            ghcr.io/rdpanek/k6:latest.prom
+          platforms: |
+            linux/amd64
