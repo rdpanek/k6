@@ -13,9 +13,7 @@ RUN mkdir -p $K6_HOME && \
     # setup go environment
     go mod init xk6-module && \
     # install xk6-prometheus
-    xk6 build --with github.com/mostafa/xk6-kafka@latest && \
-    xk6 build --with github.com/grafana/xk6-sql-driver-mysql && \
-    xk6 build --with github.com/grafana/xk6-sql@latest && \
+    xk6 build --with github.com/mostafa/xk6-kafka@latest --with github.com/grafana/xk6-sql-driver-mysql --with github.com/grafana/xk6-sql@latest && \
     mv ./k6 /usr/local/bin/k6
 
 WORKDIR $K6_HOME
