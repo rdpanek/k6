@@ -19,13 +19,13 @@ import {
 const writer = new Writer({
   // WriterConfig object
   brokers: ["localhost:9092"],
-  topic: "my-topic",
+  topic: "test-topic",
 });
 
 const reader = new Reader({
   // ReaderConfig object
   brokers: ["localhost:9092"],
-  topic: "my-topic",
+  topic: "test-topic",
 });
 
 const connection = new Connection({
@@ -40,7 +40,7 @@ if (__VU == 0) {
   // Create a topic on initialization (before producing messages)
   connection.createTopic({
   // TopicConfig object
-  topic: "my-topic",
+  topic: "test-topic",
   });
 }
 
@@ -56,11 +56,11 @@ export default function () {
       // Message object(s)
       {
       key: schemaRegistry.serialize({
-          data: "my-key",
+          data: "test-key",
           schemaType: SCHEMA_TYPE_STRING,
       }),
       value: schemaRegistry.serialize({
-          data: "my-value",
+          data: "test-value",
           schemaType: SCHEMA_TYPE_STRING,
       }),
       },
@@ -90,7 +90,7 @@ export default function () {
 
 export function teardown(data) {
   // Delete the topic
-  connection.deleteTopic("my-topic");
+  connection.deleteTopic("test-topic");
 
   // Close all connections
   writer.close();
