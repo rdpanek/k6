@@ -4,9 +4,6 @@
   "settings": {
     "terminal.integrated.shell.linux": "/bin/bash"
   },
-  "postCreateCommand": "echo 'eval \"$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"' >> ~/.bashrc && echo 'export PATH=$PATH:/home/linuxbrew/.linuxbrew/bin/k6' >> ~/.bashrc",
-  "runArgs": [
-    "--cpus", "2"
-  ],
+  "runArgs": ["--cpus", "2"],
   "extensions": []
 }
