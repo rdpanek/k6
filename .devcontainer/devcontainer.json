@@ -1,9 +1,16 @@
 {
   "name": "K6 Dev Container",
-  "dockerFile": "Dockerfile",
-  "settings": {
-    "terminal.integrated.shell.linux": "/bin/bash"
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
+  "features": {
+    "ghcr.io/grafana/k6x/features/k6": {}
   },
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y tig && curl -fsSL https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_amd64.tar.gz | sudo tar -xz -C /usr/local/bin k9s",
   "runArgs": ["--cpus", "2"],
-  "extensions": []
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  }
 }
