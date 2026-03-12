@@ -1,10 +1,7 @@
 {
   "name": "K6 Dev Container",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
-  "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
-  },
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y tig && curl -fsSL https://github.com/grafana/k6/releases/download/v1.6.1/k6-v1.6.1-linux-amd64.tar.gz | sudo tar -xz --strip-components=1 -C /usr/local/bin k6-v1.6.1-linux-amd64/k6 && curl -fsSL https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_amd64.tar.gz | sudo tar -xz -C /usr/local/bin k9s && curl -fsSL https://github.com/grafana/xk6/releases/latest/download/xk6_linux_amd64.tar.gz | sudo tar -xz -C /usr/local/bin xk6",
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y tig && curl -fsSL https://github.com/grafana/k6/releases/download/v1.6.1/k6-v1.6.1-linux-amd64.tar.gz | sudo tar -xz --strip-components=1 -C /usr/local/bin k6-v1.6.1-linux-amd64/k6 && curl -fsSL https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_amd64.tar.gz | sudo tar -xz -C /usr/local/bin k9s",
   "runArgs": ["--cpus", "2"],
   "customizations": {
     "vscode": {
