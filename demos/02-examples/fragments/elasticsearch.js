@@ -3,7 +3,7 @@ import { check, fail, group } from 'k6';
 import { uuidv4 } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js';
 
 
-const deleteIndex = function(config = fail(`missing config.`)) {
+export const deleteIndex = function(config = fail(`missing config.`)) {
   const { host, index } = config.elasticsearch
 
   group(`Delete index ${index}`, function () {
@@ -23,7 +23,7 @@ const deleteIndex = function(config = fail(`missing config.`)) {
 }
 
 
-const saveMovies = function(config = fail(`missing config.`), movies = fail(`missing movies.`)) {
+export const saveMovies = function(config = fail(`missing config.`), movies = fail(`missing movies.`)) {
   const { host, index } = config.elasticsearch
 
   group(`Save movies to Elasticsearch`, function () {
@@ -38,7 +38,7 @@ const saveMovies = function(config = fail(`missing config.`), movies = fail(`mis
   })
 }
 
-const existMovies = function(config = fail(`missing config.`), exactlyCount = fail(`missing exactlyCount.`)) {
+export const existMovies = function(config = fail(`missing config.`), exactlyCount = fail(`missing exactlyCount.`)) {
   const { host } = config.elasticsearch
 
   group(`Exist ${exactlyCount} movies in Elasticsearch`, function () {
@@ -48,11 +48,4 @@ const existMovies = function(config = fail(`missing config.`), exactlyCount = fa
       'index movies contains four records': (r) => r.json()[0]['docs.count'] === `${exactlyCount}`,
     });
   });
-}
-
-
-module.exports = {
-  saveMovies,
-  deleteIndex,
-  existMovies
 }
