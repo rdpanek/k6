@@ -30,6 +30,26 @@
  * Reálné použití:
  *   Simulace denního provozu — ranní špička, poledne, odpolední pokles.
  *   Přirozenější zátěžový profil než skok na maximum a zpět.
+ *
+ * Reálné využití z praxe:
+ *   → Simulace přirozeného denního provozu webu/aplikace:
+ *     Ráno uživatelé přicházejí, kolem poledne je peak, odpoledne odcházejí.
+ *     Bell curve to modeluje automaticky — stačí zadat max VUček, délku a granularitu.
+ *     Výhoda oproti ručním stages: nemusíte počítat konkrétní hodnoty, stačí tvar.
+ *
+ *   → Výkonnostní základna (baseline) pro porovnávání verzí:
+ *     Každý release testujete stejným bell curve profilem.
+ *     Výsledky jsou srovnatelné, protože průběh zátěže je vždy stejný tvar.
+ *
+ *   → Soak test s přirozeným profilem (ne plocha, ale zvon):
+ *     Místo "8 hodin na maximu" — 8 hodin se zvonový profil pomalu rozjede, drží a utlumí.
+ *     Lépe zachycuje memory leaky a degradaci při postupném náběhu.
+ *
+ *   → Testování zotavení systému (recovery):
+ *     Chcete vědět, jestli systém po přetížení zase "dýchá" normálně.
+ *     Bell curve přirozeně klesá — sledujete, jestli response time klesá symetricky
+ *     s počtem VUček, nebo jestli systém zůstává pomalý i při snižující se zátěži.
+ *     Asymetrie v grafu = systém se nezotavuje správně (memory leak, connection pool vyčerpán).
  */
 import http from 'k6/http';
 import { check, sleep } from 'k6';

@@ -23,6 +23,29 @@
  * Kdy použít:
  *   Simulace stálého počtu aktivních uživatelů (např. 5 lidí neustále pracuje v systému).
  *   Backoffice systémy, soak testy.
+ *
+ * Reálné využití z praxe:
+ *   → Background noise pro E2E testy:
+ *     Při spuštění Playwright/Cypress testů chcete, aby server nebyl prázdný.
+ *     Pustíte constant-vus s 5 VUčky na celou dobu E2E suite — server je mírně zatížený
+ *     a testy probíhají v realističtějším prostředí.
+ *
+ *   → Backoffice systém (účetnictví, fakturace, ERP):
+ *     15 uživatelů neustále pracuje v systému — vystavují faktury, stahují reporty.
+ *     Není tam žádná náběhová křivka, prostě "jedeme celý den konstantně".
+ *
+ *   → Soak test (výdrž systému):
+ *     Chcete vědět, jestli aplikace vydrží bez memory leaku nebo degradace 8 hodin.
+ *     Pustíte 20 VUček na 8 hodin a sledujete, jestli response time postupně neroste.
+ *
+ *   → Průběžné monitorování metrik testovaného systému:
+ *     Pokud testovaný systém nemá monitoring API, použijete jedno VU jako "sondáž" —
+ *     každé 2 sekundy se ptá na health endpoint a výsledky odesíláte do Promethea.
+ *     Kombinujete ho s jiným scénářem (viz 09-workload-model.js).
+ *
+ *   → Explorativní ladění výkonu ES / jiného nástroje:
+ *     Nastartujete constant-vus, sledujete CPU/RAM v docker stats a hledáte,
+ *     při kolika VUčkách se systém začíná "dusit" — bez složitého skriptování stages.
  */
 import http from 'k6/http';
 import { check, sleep } from 'k6';

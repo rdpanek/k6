@@ -30,6 +30,30 @@
  * Kdy použít:
  *   Spike testy — testujeme náhlý nárůst počtu požadavků.
  *   Hledáme breaking point systému v počtu req/s.
+ *
+ * Reálné využití z praxe:
+ *   → Modelování denního provozu API (logistika, kurýrní služby):
+ *     Dopravci odesílají zásilky nejčastěji v poledne, kdy přijíždějí kurýři.
+ *     Ráno nízký traffic (1–2 req/s), peak kolem 12:00 (20 req/s), odpoledne pokles.
+ *     Ramping arrival rate přesně kopíruje tento denní profil transakcí.
+ *
+ *   → E-shop s ranní a odpolední špičkou:
+ *     Uživatelé přichází ráno do práce (ramp-up), pak znovu po obědě.
+ *     Na rozdíl od ramping-vus se nemění "kolik uživatelů", ale "kolik transakcí za sekundu" —
+ *     lépe odpovídá realitě automatizovaných systémů (mobilní apky, integrace).
+ *
+ *   → Spike test — prodej vstupenek / flash sale:
+ *     Přesně v 10:00 se otevře prodej — traffic skokově vzroste z 5 na 500 req/s.
+ *     Hledáte, jestli systém spike ustojí bez dropped requests nebo výpadku.
+ *
+ *   → Vyhledávač / ES search pod rostoucí zátěží:
+ *     Indexujete data konstantní rychlostí, ale vyhledávání postupně roste
+ *     jak uživatelé přicházejí v průběhu dne. Kombinujte se scénářem pro zápis
+ *     (viz 09-workload-model.js) pro realistický mixed workload.
+ *
+ *   → CI/CD nightly stress test:
+ *     Každou noc automaticky testujete, kolik req/s aplikace zvládne.
+ *     Pomalý ramp-up → peak → ramp-down, výsledky jdou do Grafany jako trend.
  */
 import http from 'k6/http';
 import { check } from 'k6';

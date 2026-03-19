@@ -10,6 +10,7 @@
  * Co to dělá:
  *   5 VUs sdílí 30 iterací dohromady. Test skončí, když jsou všechny iterace hotové.
  *   Každé VU si "bere" další iteraci, jakmile dokončí předchozí.
+ *   → Pokud chcete zaručit STEJNÝ počet iterací na VU, použijte per-vu-iterations.
  *
  * Pozorované chování:
  *   - Rychlejší VUs (s nižším ID) obvykle zpracují více iterací.
@@ -17,9 +18,18 @@
  *   - V logu vidíte: "VU X → iterace Y" — porovnejte, kolik udělalo každé VU.
  *   - Celkový počet dokončených iterací = vždy přesně 30.
  *
- * Klíčová otázka pro studenty:
- *   Kolik iterací udělalo VU 1 vs VU 5? Proč?
- *   → Pokud chcete zaručit STEJNÝ počet iterací na VU, použijte per-vu-iterations.
+ * Reálné využití z praxe:
+ *     Příklad: setup fáze testu, kde potřebujete naplnit index daty co nejrychleji.
+ *
+ *   → Generování zátěže na API s fixním počtem požadavků:
+ *     "Chci vygenerovat 10 000 requestů na endpoint /search — kolik zvládne za jak dlouho?"
+ *     VUčka pracují paralelně, rychlejší si vezmou více práce — test skončí co nejdříve.
+ *
+ *   → Smoke test s omezeným počtem iterací:
+ *     Potřebujete ověřit, že deployment funguje — pustíte 1 VU a 5 iterací, nic víc.
+ *
+ *   → Srovnávací (benchmark) testy: vždy stejný celkový počet požadavků,
+ *     aby se výsledky daly porovnávat mezi verzemi aplikace.
  */
 import http from 'k6/http';
 import { check, sleep } from 'k6';

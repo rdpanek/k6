@@ -24,6 +24,25 @@
  * Kdy použít:
  *   Chcete, aby každý "uživatel" provedl stejný počet akcí.
  *   Např. každý VU provede 6 transakcí a pak skončí.
+ *
+ * Reálné využití z praxe:
+ *   → Generování uživatelů v bance přes UI (robot framework / browser):
+ *     Neexistuje REST API pro vytvoření uživatele — musí se klikat přes prohlížeč.
+ *     Chcete přesně 300 zlatých karet, 200 stříbrných, 100 bronzových.
+ *     Každý VU = jeden typ uživatele, každé VU provede přesně svůj počet registrací.
+ *     → Shared iterations by vygeneroval různé počty každého typu.
+ *
+ *   → E-commerce user journey s izolovanými uživateli:
+ *     Každé VU = jeden zákazník, který musí projít: login → výběr produktu → checkout → odhlášení.
+ *     Potřebujete přesně 5 kompletních nákupů, každý s unikátním uživatelem z CSV.
+ *
+ *   → Producenti do fronty (Kafka/RabbitMQ) s řízeným počtem zpráv:
+ *     3 VUčka = 3 různé typy zpráv (objednávka, platba, notifikace).
+ *     Každý typ musí odeslat přesně 10 zpráv — ne víc, ne míň.
+ *
+ *   → Load balancer test s pevným počtem paralelních socketů:
+ *     1 iterace per VU + velký počet VUček = přesně N souběžných připojení najednou.
+ *     Testujete, jak load balancer reaguje na přesně definovaný počet paralelních klientů.
  */
 import http from 'k6/http';
 import { check, sleep } from 'k6';

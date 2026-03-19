@@ -33,6 +33,28 @@
  *   * health_monitor:  5 VUs constant (constant-vus)
  *   * document_indexer: 5 RPS constant (constant-arrival-rate, startTime: 5s)
  *   * search_load:      1→10→5 RPS ramping (ramping-arrival-rate, startTime: 10s)
+ *
+ * Reálné využití z praxe:
+ *   → Realistický mixed workload pro e-shop:
+ *     Scénář 1 (constant-vus):      health/monitoring — jeden "sondážní" VU zjišťuje stav DB.
+ *     Scénář 2 (constant-arr-rate): zákazníci přidávají produkty do košíku — konstantní rate.
+ *     Scénář 3 (ramping-arr-rate):  vyhledávání roste s příchodem uživatelů přes den.
+ *
+ *   → Kafka pipeline test (producer + consumer + monitoring):
+ *     Scénář 1: constant-vus — producer posílá zprávy konstantní rychlostí.
+ *     Scénář 2: ramping-arrival-rate — počet konsumerů roste podle fronty.
+ *     Scénář 3: constant-vus — monitoring lag metriky topicu (consumer lag).
+ *
+ *   → Microservices test — realistická komunikace mezi službami:
+ *     Scénář 1: auth service — konstantní přihlašování uživatelů.
+ *     Scénář 2: product service — narůstající dotazy na katalog.
+ *     Scénář 3: order service — spike při flash sale.
+ *     Každý scénář má vlastní threshold a tag → v Grafaně vidíte breakdown per služba.
+ *
+ *   → Proč kombinovat a ne psát tři samostatné testy?
+ *     Reálný provoz není sekvenční — zápis, čtení a monitoring probíhají současně.
+ *     Kombinovaný test odhalí bottlenecky způsobené souběžností (connection pool,
+ *     thread contention, GC pauzy), které se v izolovaných testech neprojeví.
  */
 import http from 'k6/http';
 import { check, sleep, group } from 'k6';

@@ -28,6 +28,29 @@
  * Kdy použít:
  *   Throughput testy — testujeme "zvládne ES 10 req/s?"
  *   Simulace reálného příchodu uživatelů (nezávislých na odezvě).
+ *
+ * Reálné využití z praxe:
+ *   → E-commerce peak season (logistika, Vánoce, Black Friday):
+ *     Víte, že přes sváteční sezónu proteče systémem X transakcí za hodinu celý týden.
+ *     Chcete vědět, jestli to ustojí VMka, pody, APIčka a stíhá se replikovat databáze.
+ *     Reální uživatelé nepočkají, až server odpoví — posílají požadavky pevnou rychlostí.
+ *
+ *   → Frontend, který agresivně retryuje:
+ *     Špatně napsaný JS na frontendu — když backend nestíhá, frontend posílá další requesty.
+ *     Constant arrival rate simuluje tento "útok" bez ohledu na stav backendu.
+ *
+ *   → Kubernetes + HPA (Horizontal Pod Autoscaler):
+ *     Máte jasně definovanou SLA: "systém musí zvládnout 500 req/s".
+ *     Pustíte constant arrival rate na 500/s a sledujete, jestli Kubernetes přidá pody
+ *     dost rychle a jestli load balancer správně distribuuje zátěž.
+ *
+ *   → Testování fronty (Kafka, RabbitMQ) — producer side:
+ *     Chcete produkovat přesně 100 zpráv za sekundu do topicu.
+ *     Sledujete consumer lag — jak rychle konzumenti stíhají zprávy zpracovávat.
+ *
+ *   → API rate limiting test:
+ *     Chcete ověřit, že vaše API správně vrací 429 (Too Many Requests),
+ *     když překročíte limit. Pustíte konstantní rate těsně nad limit a ověříte chování.
  */
 import http from 'k6/http';
 import { check, sleep } from 'k6';

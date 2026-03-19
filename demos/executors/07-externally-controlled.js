@@ -40,6 +40,30 @@
  * Kdy použít:
  *   Explorativní testování — chcete měnit zátěž manuálně podle reakce systému.
  *   Integrace s externími orchestračními systémy (CI/CD pipeline controlling VUs).
+ *
+ * Reálné využití z praxe:
+ *   → Explorativní ladění nového systému (ES, databáze, cache):
+ *     Přicházíte k systému, který neznáte. Nastartujete test s 2 VUčky, sledujete CPU/RAM,
+ *     postupně přidáváte VUčka přes CLI a hledáte, kde se systém začíná chovat jinak —
+ *     bez nutnosti restartovat test nebo měnit konfiguraci.
+ *
+ *   → CI/CD pipeline s dynamickým řízením zátěže:
+ *     Jenkins/GitLab spustí test (0 VUček), a pak přes REST API přidává VUčka
+ *     na základě výsledků jiných kroků pipeline (např. "deploy proběhl, přidej 50 VUček").
+ *
+ *   → "Servisní" scénář v kombinaci s jiným testem:
+ *     Máte běžící ramping-arrival-rate test. Přidáte externally-controlled scénář
+ *     s 0 VUčky — normálně nic nedělá. V okamžiku, kdy chcete přidat spike,
+ *     škálujete ho přes API bez nutnosti restartovat celý test.
+ *
+ *   → Permanentní smoke test v Kubernetes (Argo CD):
+ *     Pod s K6 běží neustále, ale na 0 VUčkách (nulová zátěž = nulové náklady).
+ *     Kdykoli chcete otestovat systém, prostě škálujete VUčka přes REST API.
+ *     Odpadá zdlouhavé kolečko: změnit YAML → commit → deploy → restart podu.
+ *
+ *   → Manuální "break test" při živém incidentu:
+ *     Systém má problémy a chcete vědět, při kolika uživatelích se stabilizuje.
+ *     Postupně snižujete VUčka přes CLI a sledujete, kdy error rate klesne na přijatelnou mez.
  */
 import http from 'k6/http';
 import { check, sleep } from 'k6';

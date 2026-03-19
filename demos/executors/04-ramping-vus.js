@@ -29,6 +29,27 @@
  * Kdy použít:
  *   Ramp-up testy — hledáte, při jakém počtu VUs systém začne selhávat.
  *   Smoke → Load → Stress test scénáře.
+ *
+ * Reálné využití z praxe:
+ *   → Nejčastější executor v praxi — produkční profil zátěže:
+ *     Víte, že produkce má peak 1000 uživatelů. Nastavíte pomalý nárůst (30 min na 1000 VUs),
+ *     pak ustálená zátěž (1–2 hodiny), pak konec. Pomalý nárůst dává čas sledovat monitoring
+ *     a zachytit, při jakém počtu VUs se systém začíná chovat jinak.
+ *
+ *   → Baseline / srovnávací test před a po deploy:
+ *     Stejný ramping profil před a po nasazení nové verze — srovnáte response time grafy.
+ *
+ *   → Hledání breaking pointu (stress test):
+ *     Přidáváte VUčka, dokud systém nezačne selhávat. Threshold abortOnFail zastaví test,
+ *     jakmile error rate překročí limit — víte přesně, kde je hranice.
+ *
+ *   → Web aplikace s přirozeným náběhem:
+ *     Ráno přicházejí uživatelé postupně (ramp-up 30 min), pak pracují (hold),
+ *     odpoledne odcházejí (ramp-down). Lépe odpovídá realitě než okamžitý skok na plný počet.
+ *
+ *   → Kubernetes autoscaling test:
+ *     Pomalý nárůst VUček — sledujete, kdy Kubernetes začne přidávat pody (HPA).
+ *     Zjistíte, jestli autoscaling reaguje dost rychle a jestli nové pody stíhají.
  */
 import http from 'k6/http';
 import { check, sleep } from 'k6';

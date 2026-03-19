@@ -51,6 +51,28 @@
  *   dropped_iterations                → jen u open modelu, signalizuje problém
  *   iteration_duration p(90)/p(95)    → roste na 2s → CO signál (zahrnuje sleep)
  *   vus (v progress baru)             → open: roste na max, closed: fixních 5
+ *
+ * Reálné dopady Coordinated Omission v praxi:
+ *   → Proč na tom záleží — příklad z e-shopu:
+ *     Backend se zpomalí při DB query (GC pauza, lock contention).
+ *     Closed model (constant-vus): VUčka čekají → posílají méně requestů → "systém vydrží".
+ *     Realita: skuteční uživatelé NEčekají — posílají requesty dál, fronta narůstá.
+ *     Test s closed modelem tuto situaci NEZACHYTÍ a dá falešně pozitivní výsledek.
+ *
+ *   → Closed model je vhodný pro:
+ *     Backoffice systémy, kde uživatel skutečně čeká na odpověď před dalším krokem.
+ *     Příklad: účetní klikne "uložit fakturu" a počká, než se stránka načte.
+ *     Tady closed model odpovídá realitě — uživatel opravdu blokuje.
+ *
+ *   → Open model je vhodný pro:
+ *     Systémy s nezávislými uživateli, kteří nepočkají na souseda.
+ *     Příklad: logistický portál — 500 kurýrů posílá polohu každých 10s,
+ *     bez ohledu na to, jestli předchozí request dorazil.
+ *     Příklad: Kafka producer — posílá zprávy pevnou rychlostí nehledě na consumer lag.
+ *
+ *   → Praktické pravidlo:
+ *     Testujete API/backend bez uživatelské interakce? → Open model (arrival-rate).
+ *     Testujete UI flow, kde uživatel čeká na výsledek? → Closed model (VUs).
  */
 import http from 'k6/http';
 import { check, sleep } from 'k6';
