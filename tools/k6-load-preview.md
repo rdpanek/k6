@@ -7,6 +7,8 @@ as an ASCII chart in the terminal, or as an interactive HTML / static SVG file.
 
 No external dependencies — Go standard library and `k6` in PATH only.
 
+![k6-load-preview example — 8-scenario soak test](k6-load-preview-example.svg)
+
 ---
 
 ## Requirements
