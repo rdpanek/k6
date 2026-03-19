@@ -7,6 +7,13 @@ as an ASCII chart in the terminal, or as an interactive HTML / static SVG file.
 
 No external dependencies — Go standard library and `k6` in PATH only.
 
+```bash
+docker run --rm -v $(pwd):/work ghcr.io/rdpanek/k6:load-preview.latest \
+  demos/executors/11-kafka-8h-soak.js -o chart.html
+```
+
+![k6-load-preview — terminal ASCII chart](k6-load-preview-example-cli.png)
+
 ![k6-load-preview example — 8-scenario soak test](k6-load-preview-example.svg)
 
 ---
@@ -158,6 +165,9 @@ It contains both `k6` and the `k6-load-preview` binary.
 
 ### Pull from GitHub Container Registry
 
+The image is published for both `linux/amd64` (Intel/AMD) and `linux/arm64` (Apple Silicon / ARM servers).
+Docker automatically selects the correct variant for your platform.
+
 ```bash
 docker pull ghcr.io/rdpanek/k6:load-preview.latest
 ```
@@ -167,6 +177,18 @@ docker pull ghcr.io/rdpanek/k6:load-preview.latest
 ```bash
 # Run from the root of this repository
 docker build -f tools/Dockerfile -t k6-preview .
+```
+
+To build for both platforms at once (requires `docker buildx`):
+
+```bash
+docker buildx create --name multiplatform --driver docker-container --use
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -f tools/Dockerfile \
+  -t ghcr.io/rdpanek/k6:load-preview.latest \
+  --push \
+  .
 ```
 
 > The `Dockerfile` uses a two-stage build:
@@ -196,6 +218,12 @@ The file `chart.html` is written to your current directory (mounted as `/work`).
 ```bash
 docker run --rm -v $(pwd):/work ghcr.io/rdpanek/k6:load-preview.latest \
   demos/executors/11-kafka-8h-soak.js -o kafka-profile.svg
+```
+
+**macOS (Apple Silicon / M1, M2, M3, M4) — `linux/arm64` image is pulled automatically:**
+```bash
+docker run --rm -v $(pwd):/work ghcr.io/rdpanek/k6:load-preview.latest \
+  demos/executors/09-workload-model.js
 ```
 
 **Windows (PowerShell) — use `${PWD}` instead of `$(pwd)`:**
