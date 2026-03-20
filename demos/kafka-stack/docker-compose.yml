@@ -31,11 +31,14 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_LOG4J_ROOT_LOGLEVEL: WARN
+    # cub (Confluent Utility Belt) is built into Confluent Platform images.
+    # zk-ready waits until ZooKeeper accepts connections on the given port.
     healthcheck:
-      test: ["CMD-SHELL", "echo stat | nc localhost 2181 | grep Mode"]
+      test: ["CMD", "cub", "zk-ready", "localhost:2181", "10"]
       interval: 10s
-      timeout: 10s
+      timeout: 15s
       retries: 10
+      start_period: 20s
 
   # ── Kafka Broker ──────────────────────────────────────────────────────────
   kafka:

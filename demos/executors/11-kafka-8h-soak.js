@@ -98,8 +98,10 @@ const PRODUCE_HEADERS = {
   'Content-Type': 'application/vnd.kafka.json.v2+json',
   'Accept':       'application/vnd.kafka.v2+json',
 };
+// vnd.kafka.v2+json is the correct Accept header for topic metadata endpoints
+// (GET /topics/{topic}). vnd.kafka.json.v2+json is for consumer record fetch only.
 const CONSUME_HEADERS = {
-  'Accept': 'application/vnd.kafka.json.v2+json',
+  'Accept': 'application/vnd.kafka.v2+json',
 };
 const SCHEMA_HEADERS = {
   'Accept': 'application/vnd.schemaregistry.v1+json',
