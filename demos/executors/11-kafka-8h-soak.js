@@ -1,84 +1,84 @@
 /**
- * Kafka REST Proxy — 8h Soak Test (8 scénářů)
+ * Kafka REST Proxy — 8-Hour Soak Test (8 Scenarios)
  * https://docs.confluent.io/platform/current/kafka-rest/api.html
  *
- * Jak spustit:
+ * How to run:
  *   k6 run demos/executors/11-kafka-8h-soak.js
  *
- * Vyžaduje:
- *   Confluent Platform nebo Apache Kafka + REST Proxy:
- *     docker compose up -d
- *   REST Proxy:      http://localhost:8082  (přepis: KAFKA_REST_PROXY=...)
- *   Schema Registry: http://localhost:8081  (přepis: SCHEMA_REGISTRY=...)
+ * Requirements:
+ *   Confluent Platform (Kafka + REST Proxy + Schema Registry):
+ *     cd demos/kafka-stack && docker compose up -d
+ *   REST Proxy:      http://localhost:8082  (override: KAFKA_REST_PROXY=...)
+ *   Schema Registry: http://localhost:8081  (override: SCHEMA_REGISTRY=...)
  *
- *   Přihlašovací údaje / endpoint lze přepsat přes ENV:
+ *   Override endpoint via ENV:
  *     k6 run -e KAFKA_REST_PROXY=http://broker:8082 demos/executors/11-kafka-8h-soak.js
  *
- * Co to dělá:
- *   Simuluje realistický 8hodinový provoz na Kafka REST Proxy e-commerce platformy.
- *   8 nezávislých scénářů pokrývá celý lifecycle zpráv:
+ * What it does:
+ *   Simulates a realistic 8-hour workday on Kafka REST Proxy for an e-commerce platform.
+ *   8 independent scenarios cover the full message lifecycle:
  *
- *   Producenti (ramping-arrival-rate — Open Model):
- *   1. objednavky_producer   — nové objednávky (polední peak)
- *   2. platby_producer       — platební události (s 2min zpožděním za objednávkami)
- *   3. inventar_producer     — aktualizace skladu (rovnoměrný + polední spike zásilek)
- *   4. notifikace_producer   — zákaznické notifikace (e-mail, SMS, push)
+ *   Producers (ramping-arrival-rate — Open Model):
+ *   1. orders_producer      — new orders (lunch-hour peak)
+ *   2. payments_producer    — payment events (2-min delay behind orders)
+ *   3. inventory_producer   — warehouse stock updates (steady + midday delivery spike)
+ *   4. notifications_producer — customer notifications (email, SMS, push)
  *
- *   Konzumenti (ramping-vus — Closed Model):
- *   5. consumer_objednavky   — zpracování objednávek, škáluje s producenty
- *   6. consumer_platby       — zpracování plateb (SLA < 500ms)
+ *   Consumers (ramping-vus — Closed Model):
+ *   5. consumer_orders      — order processing, scales with producers
+ *   6. consumer_payments    — payment processing (SLA < 500 ms)
  *
- *   Infrastruktura:
- *   7. schema_registry       — validace Avro/JSON schémat (narůstá s producenty)
- *   8. dlq_monitor           — polling Dead Letter Queue
+ *   Infrastructure:
+ *   7. schema_registry      — Avro/JSON schema validation (grows with producers)
+ *   8. dlq_monitor          — Dead Letter Queue polling
  *
- * Průběh dne (8 hodin):
- *   0h–1h:   Ranní rozjezd — ramp-up všech producentů
- *   1h–3h:   Dopolední provoz — stabilní zátěž
- *   3h–4h:   Polední peak — nejvyšší throughput (~30 obj/s, ~40 inv/s)
- *   4h–6h:   Odpolední provoz — postupný pokles
- *   6h–7h:   Večerní útlum — nižší zátěž
- *   7h–8h:   Noční klid — ramp-down na nulu
+ * Daily traffic pattern (8 hours):
+ *   0h–1h:   Morning ramp-up — all producers scale up
+ *   1h–3h:   Morning traffic — steady load
+ *   3h–4h:   Lunch peak      — highest throughput (~30 orders/s, ~40 inventory/s)
+ *   4h–6h:   Afternoon       — gradual decline
+ *   6h–7h:   Evening         — low load
+ *   7h–8h:   Night wind-down — ramp down to zero
  *
- * Klíčové metriky ke sledování:
- *   http_req_duration{type:produce}   — latence produce přes REST Proxy (cíl: p95 < 200ms)
- *   http_req_duration{type:consume}   — latence consume polling (cíl: p95 < 1s)
- *   http_req_duration{type:schema}    — schema registry cache hit (cíl: p95 < 50ms)
- *   http_req_failed                   — chybovost (cíl: < 1%)
- *   dropped_iterations                — producenti nestíhají → nedostatek VUs
- *   vus (v CLI progress baru)         — konzumenti: HPA-like škálování s peakem
+ * Key metrics to watch:
+ *   http_req_duration{type:produce}  — REST Proxy produce latency (target: p95 < 200 ms)
+ *   http_req_duration{type:consume}  — consume poll latency (target: p95 < 1 s)
+ *   http_req_duration{type:schema}   — schema registry cache hit (target: p95 < 50 ms)
+ *   http_req_failed                  — error rate (target: < 1%)
+ *   dropped_iterations               — producers starved of VUs
+ *   vus (in CLI progress bar)        — consumers: KEDA-like HPA scaling with peak
  *
- * Reálné využití z praxe:
- *   → E-commerce platforma (Alza, Mall, Rohlík):
- *     Každá objednávka generuje events do Kafka topiců.
- *     8h test simuluje provoz 8:00–16:00 — ranní rozjezd,
- *     polední peak (obědové nákupy), odpolední pokles.
- *     Cíl: ověřit, že REST Proxy zvládne peak bez consumer lag
- *     a že schema registry neblokuje vysokou produce rychlost.
+ * Real-world use cases:
+ *   → E-commerce platform (e.g. large online retailer):
+ *     Every order generates events into Kafka topics.
+ *     The 8h test simulates 08:00–16:00 — morning ramp-up,
+ *     lunch peak (midday shopping), afternoon decline.
+ *     Goal: verify REST Proxy handles peak without consumer lag
+ *     and schema registry doesn't block high produce rate.
  *
- *   → Finanční instituce (platební gateway):
- *     Platební transakce musí být zpracovány < 500ms (SLA).
- *     platby_producer + consumer_platby tvoří end-to-end měřenou cestu.
- *     Zpomalení consumer_platby = nárůst consumer lag = porušení SLA.
- *     Test to odhalí jako dropped_iterations nebo p95 > threshold.
+ *   → Financial institution (payment gateway):
+ *     Payment transactions must be processed < 500 ms (SLA).
+ *     payments_producer + consumer_payments form the measured end-to-end path.
+ *     Slowing consumer_payments = growing consumer lag = SLA breach.
+ *     The test exposes this as dropped_iterations or p95 > threshold.
  *
- *   → Logistická společnost (PPL, Zásilkovna):
- *     inventar_producer simuluje skenery v skladech — rovnoměrný provoz
- *     s poledním spikem (přesun zásilek mezi sklady, přijatá dodávka).
- *     8 hodin = celá ranní/odpolední směna, test ověří výdrž brokeru.
+ *   → Logistics company (parcel delivery):
+ *     inventory_producer simulates warehouse scanners — steady traffic
+ *     with a midday spike (parcel transfers, incoming shipment).
+ *     8 hours = a full morning/afternoon shift; the test validates broker endurance.
  *
  *   → Kubernetes + Kafka HPA (KEDA):
- *     consumer_objednavky ramping-vus simuluje, jak KEDA škáluje počet
- *     consumer podů podle consumer lag. Polední peak → HPA přidá pody
- *     (více VUs), noční klid → scale-down. Test ověří, jestli škálování
- *     stíhá dohnat lag vzniklý při rychlém nárůstu produce rate.
+ *     consumer_orders ramping-vus simulates how KEDA scales consumer pod count
+ *     based on consumer lag. Lunch peak → HPA adds pods (more VUs);
+ *     night wind-down → scale-down. The test validates whether scaling
+ *     catches up with lag accumulated during rapid produce-rate ramp-up.
  *
- *   → Proč 8 scénářů v jednom testu (ne 8 oddělených)?
- *     Realita: všechny systémy běží souběžně a sdílí Kafka broker,
- *     REST Proxy connection pool a Schema Registry cache.
- *     Polední peak na objednávkách + inventáři způsobí souhrnný tlak
- *     na broker → topic leader failover, GC pauzy, network saturation.
- *     Izolovaný test každého topicu tuto souhru NEZACHYTÍ.
+ *   → Why 8 scenarios in one test (not 8 separate tests)?
+ *     Reality: all systems run simultaneously, sharing the Kafka broker,
+ *     REST Proxy connection pool and Schema Registry cache.
+ *     Lunch peak on orders + inventory creates combined pressure on the broker
+ *     → topic leader failover, GC pauses, network saturation.
+ *     An isolated per-topic test would MISS this interaction.
  */
 import http from 'k6/http';
 import { check, sleep } from 'k6';
@@ -108,32 +108,32 @@ const SCHEMA_HEADERS = {
 export const options = {
   scenarios: {
 
-    // ── 1. Producent objednávek ────────────────────────────────────────────
-    // Ranní rozjezd → dopolední provoz → polední peak (30 obj/s) → noční klid
-    objednavky_producer: {
+    // ── 1. Orders producer ────────────────────────────────────────────────
+    // Morning ramp-up → morning traffic → lunch peak (30 orders/s) → night wind-down
+    orders_producer: {
       executor: 'ramping-arrival-rate',
       exec: 'produceOrder',
       startRate: 0,
       timeUnit: '1s',
       stages: [
-        { duration: '1h',  target: 10 },  // ranní rozjezd
-        { duration: '2h',  target: 10 },  // dopolední provoz
-        { duration: '30m', target: 30 },  // ramp-up na polední peak
-        { duration: '30m', target: 30 },  // polední peak
-        { duration: '1h',  target: 20 },  // odpolední pokles
-        { duration: '1h',  target: 10 },  // podvečer
-        { duration: '1h',  target: 3  },  // večerní útlum
-        { duration: '1h',  target: 0  },  // noční klid
+        { duration: '1h',  target: 10 },  // morning ramp-up
+        { duration: '2h',  target: 10 },  // morning steady traffic
+        { duration: '30m', target: 30 },  // ramp to lunch peak
+        { duration: '30m', target: 30 },  // lunch peak
+        { duration: '1h',  target: 20 },  // afternoon decline
+        { duration: '1h',  target: 10 },  // late afternoon
+        { duration: '1h',  target: 3  },  // evening wind-down
+        { duration: '1h',  target: 0  },  // night silence
       ],
       preAllocatedVUs: 50,
       maxVUs: 100,
       tags: { type: 'produce', topic: 'orders' },
     },
 
-    // ── 2. Producent plateb ────────────────────────────────────────────────
-    // Startuje 2min po objednávkách (platba přichází s malým zpožděním).
-    // ~60 % objednávek → okamžitá platba kartou, zbytek bankovní převod.
-    platby_producer: {
+    // ── 2. Payments producer ───────────────────────────────────────────────
+    // Starts 2 min after orders (payment follows order with a small delay).
+    // ~60% of orders → immediate card payment; rest → bank transfer.
+    payments_producer: {
       executor: 'ramping-arrival-rate',
       exec: 'producePayment',
       startTime: '2m',
@@ -142,7 +142,7 @@ export const options = {
       stages: [
         { duration: '1h',  target: 6  },
         { duration: '2h',  target: 8  },
-        { duration: '30m', target: 18 },  // platební peak (mírně za objednávkami)
+        { duration: '30m', target: 18 },  // payment peak (slightly behind orders)
         { duration: '30m', target: 18 },
         { duration: '1h',  target: 12 },
         { duration: '58m', target: 6  },
@@ -154,43 +154,43 @@ export const options = {
       tags: { type: 'produce', topic: 'payments' },
     },
 
-    // ── 3. Producent skladu ────────────────────────────────────────────────
-    // Skenery ve skladu pracují rovnoměrněji než zákazníci.
-    // Polední spike = přijatá dodávka + meziskladové přesuny zásilek.
-    inventar_producer: {
+    // ── 3. Inventory producer ──────────────────────────────────────────────
+    // Warehouse scanners run more evenly than customers.
+    // Midday spike = incoming shipment + inter-warehouse parcel transfers.
+    inventory_producer: {
       executor: 'ramping-arrival-rate',
       exec: 'produceInventory',
       startTime: '1m',
       startRate: 0,
       timeUnit: '1s',
       stages: [
-        { duration: '30m',  target: 15 },  // otevření skladu
-        { duration: '2h30m',target: 20 },  // dopolední provoz
-        { duration: '30m',  target: 40 },  // polední spike — přijatá dodávka
-        { duration: '30m',  target: 35 },  // odpolední přesuny
-        { duration: '2h',   target: 20 },  // standardní provoz
-        { duration: '1h',   target: 10 },  // zavírání skladu
-        { duration: '1h',   target: 0  },  // noc
+        { duration: '30m',  target: 15 },  // warehouse opening
+        { duration: '2h30m',target: 20 },  // morning operations
+        { duration: '30m',  target: 40 },  // midday spike — incoming shipment
+        { duration: '30m',  target: 35 },  // afternoon transfers
+        { duration: '2h',   target: 20 },  // standard operations
+        { duration: '1h',   target: 10 },  // warehouse closing
+        { duration: '1h',   target: 0  },  // night
       ],
       preAllocatedVUs: 60,
       maxVUs: 120,
       tags: { type: 'produce', topic: 'inventory' },
     },
 
-    // ── 4. Producent notifikací ────────────────────────────────────────────
-    // E-mail + SMS + push notifikace navazují na objednávky a platby.
-    // Peak je krátce za objednávkovým peakem (potvrzení se odesílají).
-    notifikace_producer: {
+    // ── 4. Notifications producer ──────────────────────────────────────────
+    // Email + SMS + push notifications follow orders and payments.
+    // Peak is slightly behind the order peak (confirmation sent after order).
+    notifications_producer: {
       executor: 'ramping-arrival-rate',
       exec: 'produceNotification',
       startTime: '3m',
       startRate: 0,
       timeUnit: '1s',
       stages: [
-        { duration: '1h',  target: 5  },  // potvrzení z nočních objednávek
+        { duration: '1h',  target: 5  },  // confirmations from overnight orders
         { duration: '2h',  target: 8  },
-        { duration: '30m', target: 20 },  // peak — potvrzení objednávek + plateb
-        { duration: '30m', target: 25 },  // notifikační peak (e-mail + SMS + push)
+        { duration: '30m', target: 20 },  // peak — order + payment confirmations
+        { duration: '30m', target: 25 },  // notification peak (email + SMS + push)
         { duration: '1h',  target: 15 },
         { duration: '1h',  target: 8  },
         { duration: '1h',  target: 3  },
@@ -201,19 +201,19 @@ export const options = {
       tags: { type: 'produce', topic: 'notifications' },
     },
 
-    // ── 5. Konzument objednávek ────────────────────────────────────────────
-    // ramping-vus simuluje Kubernetes KEDA škálování consumer podů:
-    // při peaku KEDA detekuje consumer lag → přidá pody (více VUs),
-    // po peaku scale-down. GracefulRampDown 2min = čas dokončit inflight zprávy.
-    consumer_objednavky: {
+    // ── 5. Orders consumer ────────────────────────────────────────────────
+    // ramping-vus simulates Kubernetes KEDA scaling of consumer pods:
+    // at peak KEDA detects consumer lag → adds pods (more VUs);
+    // after peak → scale-down. GracefulRampDown 2 min = time to finish in-flight messages.
+    consumer_orders: {
       executor: 'ramping-vus',
       exec: 'consumeOrders',
       startTime: '30s',
       startVUs: 2,
       stages: [
-        { duration: '1h',  target: 10 },  // škálování s producenty
-        { duration: '2h',  target: 15 },  // dopolední počet konsumerů
-        { duration: '30m', target: 30 },  // peak — KEDA přidá pody
+        { duration: '1h',  target: 10 },  // scale with producers
+        { duration: '2h',  target: 15 },  // morning consumer count
+        { duration: '30m', target: 30 },  // peak — KEDA adds pods
         { duration: '30m', target: 30 },
         { duration: '2h',  target: 15 },  // KEDA scale-down
         { duration: '1h',  target: 8  },
@@ -223,10 +223,10 @@ export const options = {
       tags: { type: 'consume', topic: 'orders' },
     },
 
-    // ── 6. Konzument plateb ────────────────────────────────────────────────
-    // Platební konzument má SLA < 500ms.
-    // Pokud consumer_platby nestíhá → consumer lag roste → platby se zpožďují.
-    consumer_platby: {
+    // ── 6. Payments consumer ───────────────────────────────────────────────
+    // Payment consumer has SLA < 500 ms.
+    // If consumer_payments falls behind → consumer lag grows → payments delayed.
+    consumer_payments: {
       executor: 'ramping-vus',
       exec: 'consumePayments',
       startTime: '2m30s',
@@ -245,9 +245,9 @@ export const options = {
     },
 
     // ── 7. Schema Registry ─────────────────────────────────────────────────
-    // Každá produce operace ověří schéma (cachuje se, ale první dotaz + verze).
-    // Při peaku 4 producentů: ~30+18+40+25 = ~113 req/s → schema registry dostane
-    // podobnou zátěž (modelujeme jako ~60 req/s po odečtu cache hitů).
+    // Every produce operation validates its schema (cached after first hit).
+    // At 4-producer peak: ~30+18+40+25 = ~113 req/s → schema registry receives
+    // similar load (modelled as ~60 req/s after deducting cache hits).
     schema_registry: {
       executor: 'ramping-arrival-rate',
       exec: 'checkSchema',
@@ -255,9 +255,9 @@ export const options = {
       startRate: 0,
       timeUnit: '1s',
       stages: [
-        { duration: '1h',  target: 20 },  // cache warm-up + produkce
-        { duration: '2h',  target: 25 },  // dopolední dotazy
-        { duration: '30m', target: 60 },  // peak (4 producenti × peak rate, cache miss ~50 %)
+        { duration: '1h',  target: 20 },  // cache warm-up + production
+        { duration: '2h',  target: 25 },  // morning queries
+        { duration: '30m', target: 60 },  // peak (4 producers × peak rate, ~50% cache miss)
         { duration: '30m', target: 60 },
         { duration: '2h',  target: 35 },
         { duration: '1h',  target: 15 },
@@ -269,20 +269,20 @@ export const options = {
     },
 
     // ── 8. DLQ Monitor ─────────────────────────────────────────────────────
-    // Dead Letter Queue — monitoruje chybové zprávy v obou DLQ topicích.
-    // Malá konstantní zátěž, krátký spike v peaku (více chyb → alerting).
-    // V praxi: ops dashboard nebo Prometheus exporter volající tento endpoint.
+    // Dead Letter Queue — monitors failed messages in both DLQ topics.
+    // Small constant load; short spike at peak (more errors → alerting fires).
+    // In practice: an ops dashboard or Prometheus exporter hitting this endpoint.
     dlq_monitor: {
       executor: 'ramping-vus',
       exec: 'monitorDLQ',
       startTime: '1m',
       startVUs: 1,
       stages: [
-        { duration: '2h',  target: 2  },  // standardní monitoring
-        { duration: '30m', target: 4  },  // peak — více chybových zpráv → alerting
+        { duration: '2h',  target: 2  },  // standard monitoring
+        { duration: '30m', target: 4  },  // peak — more failed messages → alerting
         { duration: '1h',  target: 4  },
         { duration: '30m', target: 2  },
-        { duration: '4h',  target: 2  },  // zbytek dne
+        { duration: '4h',  target: 2  },  // rest of the day
       ],
       gracefulRampDown: '1m',
       tags: { type: 'monitor', topic: 'dlq' },
@@ -291,31 +291,31 @@ export const options = {
   },
 
   thresholds: {
-    // Celková chybovost REST Proxy
+    // Overall REST Proxy error rate
     http_req_failed: ['rate<0.01'],
 
-    // Produce latence: REST Proxy overhead by měl být < 200ms p95
+    // Produce latency: REST Proxy overhead should be < 200 ms p95
     'http_req_duration{type:produce}': ['p(95)<200', 'p(99)<500'],
 
-    // Consume latence: polling může trvat déle (broker timeout při prázdném topicu)
+    // Consume latency: polling may take longer (broker timeout on empty topic)
     'http_req_duration{type:consume}': ['p(95)<1000'],
 
-    // Schema Registry: cache hit → velmi rychlý, cache miss → stále < 100ms
+    // Schema Registry: cache hit → very fast, cache miss → still < 100 ms
     'http_req_duration{type:schema}': ['p(95)<50', 'p(99)<100'],
 
-    // DLQ monitoring: nekritické, ale nesmí blokovat
+    // DLQ monitoring: non-critical, but must not block
     'http_req_duration{type:monitor}': ['p(95)<500'],
 
-    // Dropped iterations: při peaku může dojít VUs u producentů
-    // rate < 5 % = přijatelné, vyšší = potřeba navýšit maxVUs
+    // Dropped iterations: acceptable to drop a few at peak when VUs are exhausted
+    // rate < 5% = acceptable; higher = increase maxVUs
     dropped_iterations: ['rate<0.05'],
   },
 };
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 const SKUS        = ['SKU-001', 'SKU-002', 'SKU-042', 'SKU-099', 'SKU-500', 'SKU-777'];
-const WAREHOUSES  = ['SKLAD-BRNO', 'SKLAD-PRAHA', 'SKLAD-OSTRAVA', 'SKLAD-PLZEN'];
+const WAREHOUSES  = ['WH-EAST', 'WH-WEST', 'WH-NORTH', 'WH-SOUTH'];
 const PAY_METHODS = ['CARD', 'GOOGLEPAY', 'APPLEPAY', 'BANKTRANSFER'];
 const NOTIF_CH    = ['EMAIL', 'SMS', 'PUSH'];
 const INV_REASONS = ['SALE', 'RETURN', 'RESTOCK', 'TRANSFER'];
@@ -329,7 +329,7 @@ function cycle(arr, n) {
   return arr[n % arr.length];
 }
 
-// ── 1. Produce: objednávky ───────────────────────────────────────────────────
+// ── 1. Produce: orders ────────────────────────────────────────────────────────
 export function produceOrder() {
   const orderId = `ord-${vuKey()}-${Date.now()}`;
   const i = exec.vu.iterationInScenario;
@@ -341,7 +341,7 @@ export function produceOrder() {
         orderId,
         customerId: `cust-${(exec.vu.idInTest * 7) % 10000}`,
         items: [{ sku: cycle(SKUS, i), qty: 1 + (i % 5) }],
-        totalCzk: 299 + (i % 5000),
+        totalUsd: 29.99 + (i % 500),
         status: 'CREATED',
         createdAt: new Date().toISOString(),
       },
@@ -352,7 +352,7 @@ export function produceOrder() {
 
   check(res, {
     'order produced (200)': (r) => r.status === 200,
-    'no offset error':      (r) => {
+    'no offset error': (r) => {
       if (r.status !== 200) return false;
       const b = JSON.parse(r.body);
       return !b.offsets?.[0]?.error;
@@ -360,7 +360,7 @@ export function produceOrder() {
   });
 }
 
-// ── 2. Produce: platby ───────────────────────────────────────────────────────
+// ── 2. Produce: payments ──────────────────────────────────────────────────────
 export function producePayment() {
   const payId = `pay-${vuKey()}-${Date.now()}`;
   const i = exec.vu.iterationInScenario;
@@ -372,8 +372,8 @@ export function producePayment() {
         paymentId:    payId,
         orderId:      `ord-${(exec.vu.idInTest * 3) % 50000}`,
         method:       cycle(PAY_METHODS, i),
-        amountCzk:    299 + (i % 5000),
-        currency:     'CZK',
+        amountUsd:    29.99 + (i % 500),
+        currency:     'USD',
         status:       'AUTHORIZED',
         authorizedAt: new Date().toISOString(),
       },
@@ -387,7 +387,7 @@ export function producePayment() {
   });
 }
 
-// ── 3. Produce: inventář ─────────────────────────────────────────────────────
+// ── 3. Produce: inventory ─────────────────────────────────────────────────────
 export function produceInventory() {
   const i   = exec.vu.iterationInScenario;
   const sku = cycle(SKUS, i);
@@ -412,7 +412,7 @@ export function produceInventory() {
   });
 }
 
-// ── 4. Produce: notifikace ───────────────────────────────────────────────────
+// ── 4. Produce: notifications ─────────────────────────────────────────────────
 export function produceNotification() {
   const customerId = `cust-${(exec.vu.idInTest * 11) % 10000}`;
   const i = exec.vu.iterationInScenario;
@@ -437,26 +437,26 @@ export function produceNotification() {
   });
 }
 
-// ── 5. Consume: objednávky ───────────────────────────────────────────────────
-// Modeluje consumer group poll přes REST Proxy.
-// V reálném nasazení: POST /consumers/{group} → POST /subscription → GET /records.
-// Zde měříme latenci /topics endpoint jako proxy za broker round-trip.
+// ── 5. Consume: orders ────────────────────────────────────────────────────────
+// Models consumer group poll via REST Proxy topic metadata endpoint.
+// GET /topics/{topic} returns topic info (name, partitions, configs) — used to
+// measure REST Proxy round-trip latency as a proxy for broker responsiveness.
 export function consumeOrders() {
   const res = http.get(`${REST_PROXY}/topics/${TOPIC_ORDERS}`, { headers: CONSUME_HEADERS });
 
   check(res, {
     'orders topic accessible': (r) => r.status === 200,
-    'topic name returned':     (r) => {
+    'topic name returned': (r) => {
       if (r.status !== 200) return false;
       const b = JSON.parse(r.body);
       return b.name === TOPIC_ORDERS;
     },
   });
 
-  sleep(0.5); // Consumer poll interval — realista na rozdíl od tight loop
+  sleep(0.5); // consumer poll interval — realistic gap between polls
 }
 
-// ── 6. Consume: platby ───────────────────────────────────────────────────────
+// ── 6. Consume: payments ──────────────────────────────────────────────────────
 export function consumePayments() {
   const res = http.get(`${REST_PROXY}/topics/${TOPIC_PAYMENTS}`, { headers: CONSUME_HEADERS });
 
@@ -467,8 +467,8 @@ export function consumePayments() {
   sleep(0.5);
 }
 
-// ── 7. Schema Registry ───────────────────────────────────────────────────────
-// Střídáme schémata všech 4 topicůproducentů — cache miss na každý unikátní subject.
+// ── 7. Schema Registry ────────────────────────────────────────────────────────
+// Cycles through schemas for all 4 producer topics — triggers cache miss for each unique subject.
 export function checkSchema() {
   const subjects = [
     `${TOPIC_ORDERS}-value`,
@@ -484,14 +484,14 @@ export function checkSchema() {
   );
 
   check(res, {
-    // 200 = schéma existuje, 404 = topic bez schématu (OK pro demo bez Schema Registry)
+    // 200 = schema exists; 404 = topic without schema (OK for demo without registered schemas)
     'schema endpoint OK': (r) => r.status === 200 || r.status === 404,
   });
 }
 
 // ── 8. DLQ Monitor ───────────────────────────────────────────────────────────
-// Polling Dead Letter Queue topicůobou producentů s největším rizikem chyb.
-// 404 = DLQ topic ještě neexistuje (žádné chyby) = pozitivní výsledek!
+// Polling Dead Letter Queue topics for both highest-risk producers.
+// 404 = DLQ topic does not exist yet (no errors) = positive result!
 export function monitorDLQ() {
   const dlqTopics = [TOPIC_DLQ_ORDERS, TOPIC_DLQ_PAYMENTS];
   const topic = cycle(dlqTopics, exec.vu.iterationInScenario);
@@ -499,14 +499,13 @@ export function monitorDLQ() {
   const res = http.get(`${REST_PROXY}/topics/${topic}`, { headers: CONSUME_HEADERS });
 
   check(res, {
-    'DLQ endpoint dostupný':    (r) => r.status === 200 || r.status === 404,
-    'DLQ je prázdný (404=OK)':  (r) => {
-      // 404 = DLQ topic neexistuje = do DLQ nikdy nic nepřišlo = výborný výsledek
-      // 200 = topic existuje, obsahuje chybné zprávy — v alertingu by to spustilo alarm
-      if (r.status === 404) return true;
-      return r.status === 200;
+    'DLQ endpoint reachable': (r) => r.status === 200 || r.status === 404,
+    'DLQ is empty (404=OK)': (r) => {
+      // 404 = DLQ topic does not exist = nothing has ever failed = excellent result
+      // 200 = topic exists, contains failed messages → would trigger alerting in production
+      return r.status === 200 || r.status === 404;
     },
   });
 
-  sleep(2); // DLQ polling každé 2 sekundy
+  sleep(2); // DLQ polling interval: every 2 seconds
 }

@@ -1,0 +1,21 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    environment: k6-kafka-demo
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Kafka broker metrics via kafka-exporter
+  # Provides: kafka_topic_partition_*, kafka_consumergroup_*, etc.
+  - job_name: kafka
+    static_configs:
+      - targets: ["kafka-exporter:9308"]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: kafka-broker

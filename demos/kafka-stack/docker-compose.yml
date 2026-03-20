@@ -1,0 +1,247 @@
+# =============================================================================
+# Kafka Demo Stack for k6 load testing
+#
+# Services:
+#   - ZooKeeper            (internal)
+#   - Kafka broker         localhost:9092
+#   - Schema Registry      localhost:8081
+#   - Kafka REST Proxy     localhost:8082   ← k6 test target
+#   - Kafka UI             localhost:8080   (browser)
+#   - kafka-exporter       localhost:9308   (Prometheus scrape)
+#   - Prometheus           localhost:9090
+#   - Grafana              localhost:3000   admin/admin
+#
+# Usage:
+#   docker compose up -d
+#   docker compose ps          # wait for all services healthy
+#   k6 run ../../demos/executors/11-kafka-8h-soak.js
+#
+# Stop and clean up:
+#   docker compose down -v
+# =============================================================================
+
+services:
+
+  # ── ZooKeeper ─────────────────────────────────────────────────────────────
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    hostname: zookeeper
+    container_name: k6-kafka-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_LOG4J_ROOT_LOGLEVEL: WARN
+    healthcheck:
+      test: ["CMD-SHELL", "echo stat | nc localhost 2181 | grep Mode"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  # ── Kafka Broker ──────────────────────────────────────────────────────────
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    hostname: kafka
+    container_name: k6-kafka-broker
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"     # external access (k6 on host, if using native kafka)
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_LOG4J_ROOT_LOGLEVEL: WARN
+      KAFKA_TOOLS_LOG4J_LOGLEVEL: ERROR
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server kafka:29092 --list"]
+      interval: 15s
+      timeout: 15s
+      retries: 10
+      start_period: 30s
+
+  # ── Schema Registry ───────────────────────────────────────────────────────
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.6.0
+    hostname: schema-registry
+    container_name: k6-kafka-schema-registry
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "kafka:29092"
+      SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081"
+      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: WARN
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8081/subjects || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+
+  # ── Kafka REST Proxy ──────────────────────────────────────────────────────
+  # Main target for the k6 test (HTTP-based Kafka access)
+  kafka-rest:
+    image: confluentinc/cp-kafka-rest:7.6.0
+    hostname: kafka-rest
+    container_name: k6-kafka-rest
+    depends_on:
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+    ports:
+      - "8082:8082"     # k6 test target: KAFKA_REST_PROXY=http://localhost:8082
+    environment:
+      KAFKA_REST_HOST_NAME: kafka-rest
+      KAFKA_REST_BOOTSTRAP_SERVERS: "kafka:29092"
+      KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
+      KAFKA_REST_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      # Increase consumer request timeout for 8h soak test
+      KAFKA_REST_CONSUMER_REQUEST_TIMEOUT_MS: 5000
+      KAFKA_REST_LOG4J_ROOT_LOGLEVEL: WARN
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8082/topics || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  # ── Topic Initialization ──────────────────────────────────────────────────
+  # Creates all required topics for the 11-kafka-8h-soak.js test
+  kafka-init:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: k6-kafka-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "Creating ecommerce topics..."
+
+        kafka-topics --bootstrap-server kafka:29092 \
+          --create --if-not-exists \
+          --topic ecommerce.orders.v1 \
+          --partitions 3 --replication-factor 1 \
+          --config retention.ms=3600000
+
+        kafka-topics --bootstrap-server kafka:29092 \
+          --create --if-not-exists \
+          --topic ecommerce.payments.v1 \
+          --partitions 3 --replication-factor 1 \
+          --config retention.ms=3600000
+
+        kafka-topics --bootstrap-server kafka:29092 \
+          --create --if-not-exists \
+          --topic ecommerce.inventory.v1 \
+          --partitions 3 --replication-factor 1 \
+          --config retention.ms=3600000
+
+        kafka-topics --bootstrap-server kafka:29092 \
+          --create --if-not-exists \
+          --topic ecommerce.notifications.v1 \
+          --partitions 3 --replication-factor 1 \
+          --config retention.ms=3600000
+
+        kafka-topics --bootstrap-server kafka:29092 \
+          --create --if-not-exists \
+          --topic ecommerce.orders.dlq \
+          --partitions 1 --replication-factor 1 \
+          --config retention.ms=86400000
+
+        kafka-topics --bootstrap-server kafka:29092 \
+          --create --if-not-exists \
+          --topic ecommerce.payments.dlq \
+          --partitions 1 --replication-factor 1 \
+          --config retention.ms=86400000
+
+        echo "Topics created:"
+        kafka-topics --bootstrap-server kafka:29092 --list
+    restart: on-failure
+
+  # ── Kafka UI ──────────────────────────────────────────────────────────────
+  # Browse topics, messages, consumer groups, schemas
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: k6-kafka-ui
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: k6-demo
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka:29092"
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: "http://schema-registry:8081"
+      DYNAMIC_CONFIG_ENABLED: "true"
+      LOGGING_LEVEL_ROOT: WARN
+
+  # ── Kafka Exporter (Prometheus metrics) ───────────────────────────────────
+  # Exposes Kafka broker metrics in Prometheus format
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:latest
+    container_name: k6-kafka-exporter
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "9308:9308"
+    command:
+      - --kafka.server=kafka:29092
+      - --log.level=warn
+    restart: unless-stopped
+
+  # ── Prometheus ────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: k6-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=12h"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+    restart: unless-stopped
+
+  # ── Grafana ───────────────────────────────────────────────────────────────
+  # Dashboard: http://localhost:3000  (admin / admin)
+  # Import Kafka dashboard: Grafana.com ID 7589 (kafka-exporter)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: k6-grafana
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_LOG_LEVEL: warn
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
+  grafana_data:
