@@ -49,8 +49,11 @@ if [ -n "${GIT_TEST_REPOSITORY}" ]; then
   fi
 fi
 
-# TEST_PLAN_NAME mode: env var defines the script, $@ are extra k6 flags
+# TEST_PLAN_NAME mode: env var defines the script, $@ are extra k6 flags.
+# cd to ${K6_HOME}/tests first so that relative paths like "demos/..." resolve
+# correctly when the volume is mounted at /home/k6/tests/demos.
 if [ -n "${TEST_PLAN_NAME}" ]; then
+  cd "${K6_HOME}/tests" 2>/dev/null || cd "${K6_HOME}"
   exec k6 run "${TEST_PLAN_NAME}" "$@"
 fi
 

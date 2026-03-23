@@ -36,7 +36,9 @@ RUN chmod +x /entrypoint.sh
 
 ENV K6_HOME=/home/k6
 
-RUN mkdir -p ${K6_HOME} && \
+# Create K6_HOME and tests/ subdir — volumes are mounted under tests/
+# e.g. -v $(pwd)/demos:/home/k6/tests/demos
+RUN mkdir -p ${K6_HOME}/tests && \
     chmod -R a+rwX ${K6_HOME}
 
 WORKDIR ${K6_HOME}
