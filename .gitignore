@@ -1,5 +1,9 @@
 .envrc
+# Ignore compiled k6 binaries in the root (k6, k6-load-preview, k6-preview, …)
 k6*
+# Allow build/k6-* directories — they contain Dockerfiles and scripts, not binaries
+!build/
+!build/**
 xk6_0.6.1_mac_arm64/
 xk6-output-prometheus-remote/
 .DS_Store
