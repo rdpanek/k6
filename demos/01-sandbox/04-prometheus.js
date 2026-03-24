@@ -1,11 +1,12 @@
 /**
  * How to run:
- * ./k6-prom run ./demos/01-sandbox/04-prometheus.js --out 'prometheus=namespace=k6'
+ * ./k6.prom run ./demos/01-sandbox/04-prometheus.js --out 'prometheus=namespace=k6'
  */
 
 import http from 'k6/http';
 import { sleep, group, check } from 'k6';
 import { Counter, Trend } from 'k6/metrics';
+import { randomString } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 
 const mobileErrors = new Counter('error_counter_mobile');
 const mobileSuccess = new Counter('success_counter_mobile');
@@ -58,9 +59,47 @@ export let options = {
 
 
 
-export function desktop() {
-  group('Get crocodile API', () => {
-    let res = http.get('https://test-api.k6.io/public/crocodiles/1/', {tags: {type: 'desktop'}});
+const BASE_URL = 'https://quickpizza.grafana.com';
+
+const PIZZA_BODY = JSON.stringify({
+  maxCaloriesPerSlice: 1000,
+  mustBeVegetarian: false,
+  excludedIngredients: [],
+  excludedTools: [],
+  maxNumberOfToppings: 5,
+  minNumberOfToppings: 2,
+  customName: '',
+});
+
+export function setup() {
+  const username = `k6_${randomString(8)}`;
+  const password = randomString(12);
+
+  http.post(`${BASE_URL}/api/users`,
+    JSON.stringify({ username, password }),
+    { headers: { 'Content-Type': 'application/json' } }
+  );
+
+  const csrfRes = http.post(`${BASE_URL}/api/csrf-token`);
+  const csrf = csrfRes.cookies['csrf'] ? csrfRes.cookies['csrf'][0].value : '';
+
+  const loginRes = http.post(`${BASE_URL}/api/users/token/login`,
+    JSON.stringify({ username, password, csrf }),
+    { headers: { 'Content-Type': 'application/json' } }
+  );
+  console.log(`Logged in with username: ${username} and password: ${password}, token: ${loginRes.json('token')}`);
+  return { token: `Token ${loginRes.json('token')}` };
+}
+
+export function desktop(data) {
+  group('Get pizza recommendation', () => {
+    let res = http.post(`${BASE_URL}/api/pizza`, PIZZA_BODY, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': data.token,
+      },
+      tags: { type: 'desktop' },
+    });
     let resCheck = check(res, {
       'is status 200': (r) => r.status === 200,
     }, {check: 'desktop'});
@@ -74,9 +113,15 @@ export function desktop() {
   });
 }
 
-export function mobile() {
-  group('Get crocodile API', () => {
-    let res = http.get('https://test-api.k6.io/public/crocodiles/1/', {tags: {type: 'mobile'}});
+export function mobile(data) {
+  group('Get pizza recommendation', () => {
+    let res = http.post(`${BASE_URL}/api/pizza`, PIZZA_BODY, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': data.token,
+      },
+      tags: { type: 'mobile' },
+    });
     let resCheck = check(res, {
       'is status 200': (r) => r.status === 200,
     }, {check: 'mobile_check'});
