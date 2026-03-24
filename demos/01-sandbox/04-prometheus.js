@@ -16,7 +16,7 @@ const desktopResponseTime = new Trend('desktop_response_time');
 
 export let options = {
   tags: { // available acros all metrics
-    type: 'smoke', // optional - type of test
+    testType: 'smoke', // optional - type of test
     tc: '3487' // optional - e.g. ticket id
   },
   scenarios: {
