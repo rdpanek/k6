@@ -24,13 +24,12 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 2,
-  "id": 1,
   "links": [],
   "panels": [
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "fei6g8mfbmm0wc"
+        "uid": "cfgzlrsauvklcb"
       },
       "fieldConfig": {
         "defaults": {
@@ -61,6 +60,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -75,7 +75,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               }
             ]
           },
@@ -105,11 +106,11 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "k6_http_req_duration_p95",
+          "expr": "histogram_quantile(\n  0.95,\n  sum by (le, tc, group, type, method) (\n    rate(k6_http_req_duration_seconds{tc=~\"$tc\"}[1m])\n  )\n) * 1000\n",
           "legendFormat": "Duration {{group}}",
           "range": true,
           "refId": "A"
@@ -134,7 +135,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "transparent"
+                "color": "transparent",
+                "value": 0
               }
             ]
           },
@@ -165,7 +167,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -219,6 +221,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -233,7 +236,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               }
             ]
           },
@@ -263,7 +267,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "editorMode": "code",
@@ -313,6 +317,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -327,7 +332,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "light-green"
+                "color": "light-green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -365,7 +371,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -390,7 +396,6 @@
           "editorMode": "builder",
           "expr": "k6_vus_max",
           "fullMetaSearch": false,
-          "hide": false,
           "includeNullMetadata": true,
           "instant": false,
           "legendFormat": "VU max",
@@ -405,21 +410,46 @@
   ],
   "preload": false,
   "refresh": "5s",
-  "schemaVersion": 41,
+  "schemaVersion": 42,
   "tags": [
     "k6",
     "PerformanceTesting"
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {
+          "text": "3487",
+          "value": "3487"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "cfgzlrsauvklcb"
+        },
+        "definition": "label_values(k6_http_req_duration_seconds,tc)",
+        "label": "tc",
+        "name": "tc",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(k6_http_req_duration_seconds,tc)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "regexApplyTo": "value",
+        "type": "query"
+      }
+    ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {},
-  "timezone": "",
+  "timezone": "browser",
   "title": "K6 performance observability",
   "uid": "xIFEOJD4k",
-  "version": 9
+  "version": 7,
+  "weekStart": ""
 }
