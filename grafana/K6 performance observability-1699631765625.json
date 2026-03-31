@@ -29,7 +29,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "cfgzlrsauvklcb"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -122,7 +122,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "fei6g8mfbmm0wc"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -172,7 +172,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "fei6g8mfbmm0wc"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -190,7 +190,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "fei6g8mfbmm0wc"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -285,7 +285,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "fei6g8mfbmm0wc"
+        "uid": "prometheus"
       },
       "description": "Current number of active virtual users",
       "fieldConfig": {
@@ -354,7 +354,7 @@
       "links": [
         {
           "targetBlank": true,
-          "title": "⚙️ Metrics",
+          "title": "\u2699\ufe0f Metrics",
           "url": "https://k6.io/docs/using-k6/tags-and-groups/"
         }
       ],
@@ -376,7 +376,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "fei6g8mfbmm0wc"
+            "uid": "prometheus"
           },
           "editorMode": "code",
           "exemplar": true,
@@ -390,7 +390,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "fei6g8mfbmm0wc"
+            "uid": "prometheus"
           },
           "disableTextWrap": false,
           "editorMode": "builder",
@@ -424,7 +424,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "cfgzlrsauvklcb"
+          "uid": "prometheus"
         },
         "definition": "label_values(k6_http_req_duration_seconds,tc)",
         "label": "tc",
