@@ -1,6 +1,6 @@
 networks:
-  k6:
-    name: k6
+  monitoring:
+    name: monitoring
     external: false
 
 services:
@@ -8,7 +8,7 @@ services:
     image: prom/prometheus
     container_name: prometheus
     networks:
-      - k6
+      - monitoring
     ports:
       - "9090:9090"
     volumes:
@@ -24,7 +24,7 @@ services:
     image: grafana/grafana
     container_name: grafana
     networks:
-      - k6
+      - monitoring
     ports:
       - "3000:3000"
     volumes:
@@ -34,7 +34,7 @@ services:
     image: ghcr.io/rdpanek/k6:prom.latest
     container_name: k6
     networks:
-      - k6
+      - monitoring
     depends_on:
       - prometheus
     volumes:
