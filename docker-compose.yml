@@ -1,0 +1,53 @@
+networks:
+  k6:
+    name: k6
+    external: false
+
+services:
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    networks:
+      - k6
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-remote-write-receiver
+      - --enable-feature=native-histograms,exemplar-storage
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    networks:
+      - k6
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/grafana-datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+
+  k6:
+    image: ghcr.io/rdpanek/k6:prom.latest
+    container_name: k6
+    networks:
+      - k6
+    depends_on:
+      - prometheus
+    volumes:
+      - ./demos:/home/k6/tests/demos
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT}
+      - TEST_PLAN_NAME=demos/01-sandbox/04-prometheus.js
+      - K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
+      - K6_PROMETHEUS_RW_PUSH_INTERVAL=5s
+      - K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM=true
+    command:
+      - -o
+      - experimental-prometheus-rw
+      - --summary-mode=disabled
+      - --no-thresholds
+      - --verbose
