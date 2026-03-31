@@ -29,6 +29,7 @@ services:
       - "3000:3000"
     volumes:
       - ./grafana/grafana-datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+      - ./grafana:/etc/grafana/provisioning/dashboards
 
   k6:
     image: ghcr.io/rdpanek/k6:prom.latest
