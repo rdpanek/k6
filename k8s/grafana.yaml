@@ -1,3 +1,60 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasource
+  namespace: k6
+data:
+  datasource.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: prometheus
+        type: prometheus
+        uid: prometheus
+        access: proxy
+        url: http://prometheus.k6.svc.cluster.local
+        isDefault: true
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provider
+  namespace: k6
+data:
+  dashboard.yaml: |
+    apiVersion: 1
+    providers:
+      - name: k6
+        type: file
+        options:
+          path: /etc/grafana/provisioning/dashboards
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-k6
+  namespace: k6
+data:
+  k6-performance-observability.json: |
+    {
+      "annotations": {"list": [{"builtIn": 1,"datasource": {"type": "datasource","uid": "grafana"},"enable": true,"hide": true,"iconColor": "rgba(0, 211, 255, 1)","name": "Annotations & Alerts","target": {"limit": 100,"matchAny": false,"tags": [],"type": "dashboard"},"type": "dashboard"}]},
+      "editable": true,
+      "graphTooltip": 2,
+      "panels": [
+        {"datasource": {"type": "prometheus","uid": "prometheus"},"fieldConfig": {"defaults": {"color": {"mode": "palette-classic"},"custom": {"axisBorderShow": false,"axisCenteredZero": false,"axisColorMode": "text","axisLabel": "seconds","axisPlacement": "auto","barAlignment": 0,"drawStyle": "line","fillOpacity": 0,"gradientMode": "none","hideFrom": {"legend": false,"tooltip": false,"viz": false},"insertNulls": false,"lineInterpolation": "linear","lineWidth": 1,"pointSize": 1,"scaleDistribution": {"type": "linear"},"showPoints": "auto","showValues": false,"spanNulls": false,"stacking": {"group": "A","mode": "none"},"thresholdsStyle": {"mode": "off"}},"mappings": [],"thresholds": {"mode": "absolute","steps": [{"color": "green","value": 0}]},"unit": "none"},"overrides": []},"gridPos": {"h": 7,"w": 21,"x": 0,"y": 0},"id": 12,"options": {"legend": {"calcs": ["lastNotNull"],"displayMode": "list","placement": "bottom","showLegend": true},"tooltip": {"hideZeros": false,"mode": "multi","sort": "none"}},"targets": [{"editorMode": "code","expr": "histogram_quantile(\n  0.95,\n  sum by (le, tc, group, type, method) (\n    rate(k6_http_req_duration_seconds{tc=~\"$tc\"}[1m])\n  )\n) * 1000\n","legendFormat": "Duration {{group}}","range": true,"refId": "A"}],"title": "Duration (k6)","type": "timeseries"},
+        {"datasource": {"type": "prometheus","uid": "prometheus"},"fieldConfig": {"defaults": {"color": {"fixedColor": "super-light-blue","mode": "fixed"},"mappings": [],"thresholds": {"mode": "absolute","steps": [{"color": "transparent","value": 0}]},"unit": "none"},"overrides": []},"gridPos": {"h": 5,"w": 3,"x": 21,"y": 0},"id": 8,"options": {"colorMode": "none","graphMode": "area","justifyMode": "center","orientation": "auto","reduceOptions": {"calcs": [],"fields": "","values": false},"showPercentChange": false,"text": {},"textMode": "value","wideLayout": true},"targets": [{"datasource": {"type": "prometheus","uid": "prometheus"},"editorMode": "code","exemplar": false,"expr": "k6_vus","instant": true,"legendFormat": "__auto","range": false,"refId": "VUs"}],"title": "Total VU Current (k6)","type": "stat"},
+        {"datasource": {"type": "prometheus","uid": "prometheus"},"fieldConfig": {"defaults": {"color": {"mode": "palette-classic"},"custom": {"axisBorderShow": false,"axisCenteredZero": false,"axisColorMode": "text","axisLabel": "","axisPlacement": "auto","barAlignment": 0,"drawStyle": "line","fillOpacity": 7,"gradientMode": "none","hideFrom": {"legend": false,"tooltip": false,"viz": false},"insertNulls": false,"lineInterpolation": "linear","lineWidth": 1,"pointSize": 1,"scaleDistribution": {"type": "linear"},"showPoints": "never","showValues": false,"spanNulls": false,"stacking": {"group": "A","mode": "none"},"thresholdsStyle": {"mode": "off"}},"mappings": [],"thresholds": {"mode": "absolute","steps": [{"color": "green","value": 0}]},"unit": "none"},"overrides": []},"gridPos": {"h": 8,"w": 21,"x": 0,"y": 7},"id": 11,"options": {"legend": {"calcs": ["lastNotNull"],"displayMode": "list","placement": "bottom","showLegend": true},"tooltip": {"hideZeros": false,"mode": "multi","sort": "none"}},"targets": [{"editorMode": "code","exemplar": false,"expr": "k6_http_reqs_total","instant": false,"legendFormat": "Requests {{group}} {{type}}","range": true,"refId": "HTTP reqs"}],"title": "Requests (k6)","type": "timeseries"},
+        {"datasource": {"type": "prometheus","uid": "prometheus"},"description": "Current number of active virtual users","fieldConfig": {"defaults": {"color": {"mode": "palette-classic"},"custom": {"axisBorderShow": false,"axisCenteredZero": false,"axisColorMode": "text","axisLabel": "","axisPlacement": "auto","barAlignment": 0,"drawStyle": "line","fillOpacity": 0,"gradientMode": "opacity","hideFrom": {"legend": false,"tooltip": false,"viz": false},"insertNulls": false,"lineInterpolation": "linear","lineWidth": 1,"pointSize": 1,"scaleDistribution": {"type": "linear"},"showPoints": "auto","showValues": false,"spanNulls": false,"stacking": {"group": "A","mode": "none"},"thresholdsStyle": {"mode": "off"}},"mappings": [],"thresholds": {"mode": "absolute","steps": [{"color": "light-green","value": 0},{"color": "red","value": 300}]}},"overrides": []},"gridPos": {"h": 5,"w": 21,"x": 0,"y": 15},"id": 2,"options": {"legend": {"calcs": [],"displayMode": "list","placement": "bottom","showLegend": true},"tooltip": {"hideZeros": false,"mode": "multi","sort": "none"}},"targets": [{"datasource": {"type": "prometheus","uid": "prometheus"},"editorMode": "code","exemplar": true,"expr": "k6_vus","format": "time_series","instant": false,"legendFormat": "VU total","refId": "VUs"},{"datasource": {"type": "prometheus","uid": "prometheus"},"editorMode": "builder","expr": "k6_vus_max","instant": false,"legendFormat": "VU max","range": true,"refId": "VU max"}],"title": "VU (k6)","type": "timeseries"}
+      ],
+      "refresh": "5s",
+      "schemaVersion": 42,
+      "tags": ["k6","PerformanceTesting"],
+      "templating": {"list": [{"current": {},"datasource": {"type": "prometheus","uid": "prometheus"},"definition": "label_values(k6_http_req_duration_seconds,tc)","label": "tc","name": "tc","options": [],"query": {"qryType": 1,"query": "label_values(k6_http_req_duration_seconds,tc)","refId": "PrometheusVariableQueryEditor-VariableQuery"},"refresh": 1,"regex": "","type": "query"}]},
+      "time": {"from": "now-1h","to": "now"},
+      "timezone": "browser",
+      "title": "K6 performance observability",
+      "uid": "xIFEOJD4k"
+    }
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,6 +75,25 @@ spec:
         image: grafana/grafana
         ports:
         - containerPort: 3000
+        volumeMounts:
+        - name: datasource
+          mountPath: /etc/grafana/provisioning/datasources
+        - name: dashboard-provider
+          mountPath: /etc/grafana/provisioning/dashboards/dashboard.yaml
+          subPath: dashboard.yaml
+        - name: dashboard-k6
+          mountPath: /etc/grafana/provisioning/dashboards/k6-performance-observability.json
+          subPath: k6-performance-observability.json
+      volumes:
+      - name: datasource
+        configMap:
+          name: grafana-datasource
+      - name: dashboard-provider
+        configMap:
+          name: grafana-dashboard-provider
+      - name: dashboard-k6
+        configMap:
+          name: grafana-dashboard-k6
 ---
 apiVersion: v1
 kind: Service

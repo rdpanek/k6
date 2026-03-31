@@ -26,19 +26,26 @@ spec:
             topologyKey: "kubernetes.io/hostname"
       containers:
       - name: k6
-        image: quay.io/rdpanek/k6:0.47.0
-        args: ["-o", "experimental-prometheus-rw", "--insecure-skip-tls-verify", "--no-usage-report"]
+        image: ghcr.io/rdpanek/k6:prom.latest
+        args:
+          - "-o"
+          - "experimental-prometheus-rw"
+          - "--summary-mode=disabled"
+          - "--no-thresholds"
+          - "--verbose"
         env:
         - name: GIT_REVISION
-          value: "a5329f2"
+          value: "0a36a87"
         - name: TEST_PLAN_NAME
-          value: "./demos/01-sandbox/04-prometheus.js"
+          value: "demos/01-sandbox/04-prometheus.js"
         - name: GIT_TEST_REPOSITORY
           value: "https://github.com/rdpanek/k6.git"
-        - name: ENV_PRINT
-          value: "allow"
         - name: K6_PROMETHEUS_RW_SERVER_URL
           value: "http://prometheus.k6.svc.cluster.local/api/v1/write"
+        - name: K6_PROMETHEUS_RW_PUSH_INTERVAL
+          value: "5s"
+        - name: K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM
+          value: "true"
         resources:
           requests:
             memory: "2Gi"
